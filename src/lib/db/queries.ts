@@ -58,7 +58,7 @@ export async function getPublicFeedPosts(options?: {
       .from(posts)
       .innerJoin(brands, eq(brands.id, posts.brandId))
       .where(and(...conditions))
-      .orderBy(desc(sql`COALESCE(${posts.publishedAt}, ${posts.id})`))
+      .orderBy(desc(posts.publishedAt), desc(posts.id))
       .limit(limit);
 
     return rows
@@ -148,7 +148,7 @@ export async function getPublicPostsByBrandSlug(
       .from(posts)
       .innerJoin(brands, eq(brands.id, posts.brandId))
       .where(and(publicGates, eq(brands.publicSlug, slug)))
-      .orderBy(desc(sql`COALESCE(${posts.publishedAt}, ${posts.id})`))
+      .orderBy(desc(posts.publishedAt), desc(posts.id))
       .limit(limit);
 
     return rows
