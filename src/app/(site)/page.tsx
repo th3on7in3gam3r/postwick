@@ -96,7 +96,6 @@ export default async function HomePage({
             activeCity={city}
             activeQuery={q}
             resultTotal={filtersActive ? page.total : undefined}
-            sticky
           />
 
           <NewThisWeek posts={recent} />

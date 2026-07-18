@@ -53,7 +53,7 @@ export function DiscoverSearchForm({
         defaultValue={activeQuery ?? ""}
         placeholder="Search posts or brands"
         enterKeyHint="search"
-        className="w-full min-w-0 flex-1 rounded-full border border-ink/10 bg-white/70 px-4 py-2 text-sm text-ink outline-none transition placeholder:text-slate/70 focus:border-ink/30 sm:min-w-[12rem]"
+        className="w-full min-w-0 flex-1 rounded-full border border-ink/10 bg-white/70 px-4 py-2 text-sm text-ink outline-none transition placeholder:text-slate/70 focus:border-ink/30 sm:min-w-[12rem] sm:max-w-md"
         onKeyDown={(e) => {
           if (e.key !== "Enter") return;
           e.preventDefault();
