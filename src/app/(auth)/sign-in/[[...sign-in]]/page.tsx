@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { SignUp } from "@clerk/nextjs";
+import { SignIn } from "@clerk/nextjs";
 import { ClerkMissingKeys } from "@/components/clerk-missing-keys";
 import { safeAuthRedirectPath } from "@/lib/auth-redirect";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Sign up",
+  title: "Sign in",
   robots: { index: false, follow: true },
 };
 
@@ -17,7 +17,7 @@ function isClerkConfigured() {
   );
 }
 
-export default function SignUpPage({
+export default function SignInPage({
   searchParams,
 }: {
   searchParams: { redirect_url?: string };
@@ -29,14 +29,12 @@ export default function SignUpPage({
   const afterAuth = safeAuthRedirectPath(searchParams.redirect_url);
 
   return (
-    <div className="flex justify-center py-10">
-      <SignUp
-        routing="path"
-        path="/sign-up"
-        signInUrl={`/sign-in?redirect_url=${encodeURIComponent(afterAuth)}`}
-        forceRedirectUrl={afterAuth}
-        fallbackRedirectUrl={afterAuth}
-      />
-    </div>
+    <SignIn
+      routing="path"
+      path="/sign-in"
+      signUpUrl={`/sign-up?redirect_url=${encodeURIComponent(afterAuth)}`}
+      forceRedirectUrl={afterAuth}
+      fallbackRedirectUrl={afterAuth}
+    />
   );
 }

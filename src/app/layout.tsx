@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Fraunces, DM_Sans } from "next/font/google";
-import { SiteFooter, SiteHeader } from "@/components/site-chrome";
 import { appUrl } from "@/lib/brand";
 import "./globals.css";
 
@@ -46,16 +45,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const content = (
-    <>
-      <SiteHeader />
-      <main className="mx-auto w-full max-w-5xl bg-transparent px-5 pb-8 md:px-8">
-        {children}
-      </main>
-      <SiteFooter />
-    </>
-  );
-
   return (
     <html lang="en">
       <body className={`${display.variable} ${sans.variable} antialiased`}>
@@ -66,10 +55,10 @@ export default function RootLayout({
             signInFallbackRedirectUrl="/studio"
             signUpFallbackRedirectUrl="/studio"
           >
-            {content}
+            {children}
           </ClerkProvider>
         ) : (
-          content
+          children
         )}
       </body>
     </html>

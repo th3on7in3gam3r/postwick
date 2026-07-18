@@ -58,3 +58,72 @@ body {
 .feed-grid-enter {
   animation: feed-grid-enter 0.35s ease-out both;
 }
+
+/* Clerk-style auth ambient blobs */
+.auth-blob-a {
+  background: radial-gradient(
+    circle at 40% 40%,
+    #5eead4 0%,
+    rgba(94, 234, 212, 0.35) 45%,
+    transparent 70%
+  );
+  animation: auth-drift-a 18s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.auth-blob-b {
+  background: radial-gradient(
+    circle at 55% 50%,
+    #c4b5fd 0%,
+    rgba(196, 181, 253, 0.35) 45%,
+    transparent 70%
+  );
+  animation: auth-drift-b 20s ease-in-out infinite alternate;
+  animation-delay: -4s;
+  will-change: transform;
+}
+
+.auth-blob-c {
+  background: radial-gradient(
+    circle at 50% 50%,
+    #93c5fd 0%,
+    rgba(147, 197, 253, 0.3) 45%,
+    transparent 70%
+  );
+  animation: auth-drift-c 14s ease-in-out infinite alternate;
+  animation-delay: -7s;
+  will-change: transform;
+}
+
+@keyframes auth-drift-a {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(48px, 36px) scale(1.08);
+  }
+}
+
+@keyframes auth-drift-b {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(-56px, -40px) scale(1.1);
+  }
+}
+
+@keyframes auth-drift-c {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(32px, -28px) scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-blob {
+    animation: none !important;
+  }
+}
