@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Fraunces, DM_Sans } from "next/font/google";
+import Script from "next/script";
 import { appUrl } from "@/lib/brand";
 import "./globals.css";
 
@@ -89,6 +90,11 @@ export default function RootLayout({
         ) : (
           children
         )}
+        <Script
+          src="https://pulse-5o1m.onrender.com/pulse.js"
+          strategy="afterInteractive"
+          data-site="postwick-vercel-app"
+        />
       </body>
     </html>
   );
