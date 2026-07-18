@@ -20,7 +20,7 @@ export function sharePageMetadata({
   imageUrl?: string | null;
 }): Metadata {
   const url = `${appUrl()}${path.startsWith("/") ? path : `/${path}`}`;
-  const image = safeImageUrl(imageUrl) ?? `${appUrl()}/icon.png`;
+  const image = safeImageUrl(imageUrl) ?? `${appUrl()}/og.png`;
 
   return {
     title,
@@ -32,7 +32,7 @@ export function sharePageMetadata({
       title,
       description,
       siteName: "Postwick",
-      images: [{ url: image }],
+      images: [{ url: image, width: 1200, height: 630 }],
     },
     twitter: {
       card: "summary_large_image",

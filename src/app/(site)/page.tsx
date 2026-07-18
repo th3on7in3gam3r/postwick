@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import { FilterEmpty, FeedEmpty } from "@/components/post-card";
 import { DiscoverFilters } from "@/components/discover-filters";
 import { FeedGrid } from "@/components/feed-grid";
+import {
+  FeedPendingShell,
+  FilterNavProvider,
+} from "@/components/filter-nav";
 import { NewThisWeek } from "@/components/new-this-week";
+import { WorkflowSteps } from "@/components/workflow-steps";
 import { kerygmaUrl } from "@/lib/brand";
 import {
   getPublicCities,
@@ -11,16 +16,17 @@ import {
   getRecentPublicFeedPosts,
 } from "@/lib/db";
 import {
-  sanitizeCity,
-  sanitizeNiche,
+  resolveActiveFilter,
   sanitizeSearchQuery,
 } from "@/lib/env";
+import { sharePageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = sharePageMetadata({
   title: "Home",
   description:
     "Browse opt-in published posts from local brands on Postwick.",
-};
+  path: "/",
+});
 
 export const dynamic = "force-dynamic";
 
@@ -29,15 +35,19 @@ export default async function HomePage({
 }: {
   searchParams: { niche?: string; city?: string; q?: string };
 }) {
-  const niche = sanitizeNiche(searchParams.niche);
-  const city = sanitizeCity(searchParams.city);
   const q = sanitizeSearchQuery(searchParams.q);
-  const filtersActive = Boolean(niche || city || q);
 
-  const [page, niches, cities, recent] = await Promise.all([
-    getPublicFeedPosts({ niche, city, q }),
+  const [niches, cities] = await Promise.all([
     getPublicNiches(),
     getPublicCities(),
+  ]);
+
+  const niche = resolveActiveFilter(searchParams.niche, niches);
+  const city = resolveActiveFilter(searchParams.city, cities);
+  const filtersActive = Boolean(niche || city || q);
+
+  const [page, recent] = await Promise.all([
+    getPublicFeedPosts({ niche, city, q }),
     getRecentPublicFeedPosts({ days: 7, limit: 12, niche, city, q }),
   ]);
 
@@ -70,39 +80,47 @@ export default async function HomePage({
             Create on Kerygma
           </a>
         </div>
-        <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate/90">
-          Workflow: create and publish on Kerygma → share to Postwick → manage
-          captions and username in Studio.
-        </p>
+        <WorkflowSteps />
       </section>
 
-      <DiscoverFilters
-        niches={niches}
-        cities={cities}
+      <FilterNavProvider
         activeNiche={niche}
         activeCity={city}
         activeQuery={q}
-        resultTotal={filtersActive ? page.total : undefined}
-      />
+      >
+        <div className="space-y-10">
+          <DiscoverFilters
+            niches={niches}
+            cities={cities}
+            activeNiche={niche}
+            activeCity={city}
+            activeQuery={q}
+            resultTotal={filtersActive ? page.total : undefined}
+            sticky
+          />
 
-      <NewThisWeek posts={recent} />
+          <NewThisWeek posts={recent} />
 
-      {page.posts.length === 0 ? (
-        filtersActive ? (
-          <FilterEmpty />
-        ) : (
-          <FeedEmpty />
-        )
-      ) : (
-        <FeedGrid
-          key={`${niche ?? ""}-${city ?? ""}-${q ?? ""}`}
-          initialPosts={page.posts}
-          initialHasMore={page.hasMore}
-          initialNextOffset={page.nextOffset}
-          initialTotal={page.total}
-          source={{ kind: "home", niche, city, q }}
-        />
-      )}
+          <FeedPendingShell>
+            {page.posts.length === 0 ? (
+              filtersActive ? (
+                <FilterEmpty />
+              ) : (
+                <FeedEmpty />
+              )
+            ) : (
+              <FeedGrid
+                key={`${niche ?? ""}-${city ?? ""}-${q ?? ""}`}
+                initialPosts={page.posts}
+                initialHasMore={page.hasMore}
+                initialNextOffset={page.nextOffset}
+                initialTotal={page.total}
+                source={{ kind: "home", niche, city, q }}
+              />
+            )}
+          </FeedPendingShell>
+        </div>
+      </FilterNavProvider>
     </div>
   );
 }

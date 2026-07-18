@@ -10,6 +10,7 @@ export function ReportForm() {
   const [postUrl, setPostUrl] = useState(searchParams.get("url") ?? "");
   const [brandSlug, setBrandSlug] = useState(searchParams.get("slug") ?? "");
   const [reason, setReason] = useState("");
+  const [status, setStatus] = useState<"idle" | "opening">("idle");
 
   const mailtoHref = useMemo(() => {
     const to = supportEmail();
@@ -33,6 +34,7 @@ export function ReportForm() {
       className="mt-8 space-y-5"
       onSubmit={(event) => {
         event.preventDefault();
+        setStatus("opening");
         window.location.href = mailtoHref;
       }}
     >
@@ -69,10 +71,16 @@ export function ReportForm() {
       </label>
       <button
         type="submit"
-        className="rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-fog transition hover:bg-ink/90"
+        disabled={status === "opening"}
+        className="rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-fog transition hover:bg-ink/90 disabled:opacity-60"
       >
-        Open email to report
+        {status === "opening" ? "Opening email…" : "Open email to report"}
       </button>
+      {status === "opening" ? (
+        <p className="text-sm font-medium text-accent" role="status">
+          Opening your email app to finish the report…
+        </p>
+      ) : null}
       <p className="text-xs text-slate">
         Opens your mail app to{" "}
         <a

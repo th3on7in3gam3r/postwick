@@ -64,13 +64,8 @@ export default async function BrandPage({ params }: PageProps) {
           {brand.name}
         </h1>
         {brand.ownerUsername ? (
-          <p className="mt-2">
-            <Link
-              href={`/u/${encodeURIComponent(brand.ownerUsername)}`}
-              className="text-sm font-medium text-accent underline-offset-2 hover:underline"
-            >
-              @{brand.ownerUsername}
-            </Link>
+          <p className="mt-2 text-sm font-medium text-accent" aria-current="page">
+            @{brand.ownerUsername}
           </p>
         ) : null}
         {brand.description ? (

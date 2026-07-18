@@ -14,49 +14,40 @@ const navLinkClass =
 
 export function SiteHeader() {
   return (
-    <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-5 py-5 md:gap-6 md:px-8 md:py-6">
-      {/* Hard nav: Clerk catch-all sign-in routes can trap Next.js <Link> soft nav to /. */}
-      <a
-        href="/"
-        className="group flex min-w-0 shrink-0 items-center gap-2.5"
-        aria-label="Postwick home"
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/logo.svg"
-          alt=""
-          width={32}
-          height={32}
-          className="h-8 w-8 rounded-[0.55rem]"
-        />
-        <span className="font-display text-[1.35rem] tracking-tight text-ink md:text-2xl">
-          Postwick
-        </span>
-      </a>
+    <header className="sticky top-0 z-40 border-b border-ink/8 bg-white/80 backdrop-blur-md">
+      <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-5 py-4 md:gap-6 md:px-8 md:py-5">
+        {/* Hard nav: Clerk catch-all sign-in routes can trap Next.js <Link> soft nav to /. */}
+        <a
+          href="/"
+          className="group flex min-w-0 shrink-0 items-center gap-2.5"
+          aria-label="Postwick home"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.svg"
+            alt=""
+            width={32}
+            height={32}
+            className="h-8 w-8 rounded-[0.55rem]"
+          />
+          <span className="font-display text-[1.35rem] tracking-tight text-ink md:text-2xl">
+            Postwick
+          </span>
+        </a>
 
-      <nav
-        className="flex min-w-0 items-center gap-1 text-sm sm:gap-2"
-        aria-label="Primary"
-      >
-        <div className="flex items-center gap-0.5 sm:gap-1">
+        <nav
+          className="flex min-w-0 items-center gap-1 text-sm sm:gap-2"
+          aria-label="Primary"
+        >
           <a href="/" className={navLinkClass}>
             Home
           </a>
           <a href="/studio" className={navLinkClass}>
             Studio
           </a>
-        </div>
-
-        {isClerkConfigured() ? (
-          <>
-            <span
-              className="mx-1.5 hidden h-4 w-px bg-ink/10 sm:block"
-              aria-hidden
-            />
-            <AuthNav />
-          </>
-        ) : null}
-      </nav>
+          {isClerkConfigured() ? <AuthNav /> : null}
+        </nav>
+      </div>
     </header>
   );
 }

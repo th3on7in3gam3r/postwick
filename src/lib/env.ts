@@ -76,3 +76,40 @@ export function sanitizeSearchQuery(
   const cleaned = trimmed.replace(/[%_]/g, "").slice(0, 80).trim();
   return cleaned || undefined;
 }
+
+/** Normalize for fuzzy filter matching (case / punctuation insensitive). */
+export function normalizeFilterKey(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[&+/]/g, " ")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Map a URL filter param to a canonical option from the known list.
+ * Exact (case-insensitive) wins; otherwise unique substring / word match.
+ */
+export function resolveActiveFilter(
+  param: string | null | undefined,
+  options: string[],
+): string | undefined {
+  const raw = param?.trim();
+  if (!raw || options.length === 0) return undefined;
+
+  const key = normalizeFilterKey(raw);
+  if (!key) return undefined;
+
+  const exact = options.find((opt) => normalizeFilterKey(opt) === key);
+  if (exact) return exact;
+
+  const partial = options.filter((opt) => {
+    const optKey = normalizeFilterKey(opt);
+    return optKey.includes(key) || key.includes(optKey);
+  });
+  if (partial.length === 1) return partial[0];
+
+  return undefined;
+}

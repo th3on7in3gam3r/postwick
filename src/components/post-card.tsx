@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CopyLinkButton } from "@/components/copy-link-button";
+import { ReportLink } from "@/components/report-link";
 import type { PublicFeedPost } from "@/lib/db";
 import { appUrl, kerygmaUrl } from "@/lib/brand";
 import { safeImageUrl } from "@/lib/safe-url";
@@ -14,9 +15,6 @@ function formatWhen(value: string | null) {
     year: "numeric",
   });
 }
-
-const actionClass =
-  "text-xs font-medium text-slate/80 underline-offset-2 transition hover:text-ink hover:underline";
 
 export function PostCard({
   post,
@@ -88,8 +86,8 @@ export function PostCard({
             </Link>
             {post.ownerUsername ? (
               <Link
-                href={`/u/${encodeURIComponent(post.ownerUsername)}`}
-                className="text-xs font-medium text-accent underline-offset-2 hover:underline"
+                href={`/b/${post.brandSlug}`}
+                className="relative z-10 text-xs font-medium text-accent underline-offset-2 hover:underline"
               >
                 @{post.ownerUsername}
               </Link>
@@ -100,9 +98,7 @@ export function PostCard({
         )}
         <div className="flex items-center gap-3 border-l border-ink/10 pl-3">
           <CopyLinkButton url={postUrl} label="Copy link" variant="text" />
-          <Link href={reportHref} className={actionClass}>
-            Report
-          </Link>
+          <ReportLink href={reportHref} />
         </div>
       </div>
     </article>

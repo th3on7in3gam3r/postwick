@@ -1,4 +1,7 @@
-import Link from "next/link";
+"use client";
+
+import { DiscoverSearchForm } from "@/components/discover-search-form";
+import { FilterNavLink } from "@/components/filter-nav";
 import { cn } from "@/lib/utils";
 
 function hrefFor(opts: { niche?: string; city?: string; q?: string }) {
@@ -26,6 +29,7 @@ export function DiscoverFilters({
   activeCity,
   activeQuery,
   resultTotal,
+  sticky = false,
 }: {
   niches: string[];
   cities: string[];
@@ -33,51 +37,24 @@ export function DiscoverFilters({
   activeCity?: string;
   activeQuery?: string;
   resultTotal?: number;
+  sticky?: boolean;
 }) {
   const filtersActive = Boolean(activeNiche || activeCity || activeQuery);
   const showPills = niches.length > 0 || cities.length > 0;
 
   return (
-    <div className="space-y-4">
-      <form
-        method="get"
-        action="/"
-        className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center"
-      >
-        {activeNiche ? (
-          <input type="hidden" name="niche" value={activeNiche} />
-        ) : null}
-        {activeCity ? (
-          <input type="hidden" name="city" value={activeCity} />
-        ) : null}
-        <label className="sr-only" htmlFor="feed-search">
-          Search posts
-        </label>
-        <input
-          id="feed-search"
-          name="q"
-          type="search"
-          defaultValue={activeQuery ?? ""}
-          placeholder="Search posts or brands"
-          className="w-full min-w-0 flex-1 rounded-full border border-ink/10 bg-white/70 px-4 py-2 text-sm text-ink outline-none transition placeholder:text-slate/70 focus:border-ink/30 sm:min-w-[12rem]"
-        />
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="submit"
-            className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-fog transition hover:bg-ink/90"
-          >
-            Search
-          </button>
-          {activeQuery ? (
-            <Link
-              href={hrefFor({ niche: activeNiche, city: activeCity })}
-              className="inline-flex items-center rounded-full border border-ink/10 bg-white/70 px-4 py-2 text-sm font-medium text-slate transition hover:border-ink/25 hover:text-ink"
-            >
-              Clear search
-            </Link>
-          ) : null}
-        </div>
-      </form>
+    <div
+      className={cn(
+        "space-y-4",
+        sticky &&
+          "sticky top-16 z-30 -mx-5 border-b border-ink/8 bg-white/80 px-5 py-4 backdrop-blur-md md:-mx-8 md:px-8",
+      )}
+    >
+      <DiscoverSearchForm
+        activeNiche={activeNiche}
+        activeCity={activeCity}
+        activeQuery={activeQuery}
+      />
 
       {showPills ? (
         <>
@@ -87,7 +64,7 @@ export function DiscoverFilters({
                 Niche
               </p>
               <div className={pillRowClass}>
-                <Link
+                <FilterNavLink
                   href={hrefFor({ city: activeCity, q: activeQuery })}
                   className={cn(
                     pillBase,
@@ -95,9 +72,9 @@ export function DiscoverFilters({
                   )}
                 >
                   All
-                </Link>
+                </FilterNavLink>
                 {niches.map((niche) => (
-                  <Link
+                  <FilterNavLink
                     key={niche}
                     href={hrefFor({
                       niche,
@@ -110,7 +87,7 @@ export function DiscoverFilters({
                     )}
                   >
                     {niche}
-                  </Link>
+                  </FilterNavLink>
                 ))}
               </div>
             </div>
@@ -122,14 +99,14 @@ export function DiscoverFilters({
                 City
               </p>
               <div className={pillRowClass}>
-                <Link
+                <FilterNavLink
                   href={hrefFor({ niche: activeNiche, q: activeQuery })}
                   className={cn(pillBase, !activeCity ? pillActive : pillIdle)}
                 >
                   All
-                </Link>
+                </FilterNavLink>
                 {cities.map((city) => (
-                  <Link
+                  <FilterNavLink
                     key={city}
                     href={hrefFor({
                       niche: activeNiche,
@@ -142,7 +119,7 @@ export function DiscoverFilters({
                     )}
                   >
                     {city}
-                  </Link>
+                  </FilterNavLink>
                 ))}
               </div>
             </div>

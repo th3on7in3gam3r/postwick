@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { CopyLinkButton } from "@/components/copy-link-button";
+import { ReportLink } from "@/components/report-link";
 import type { PublicBrandProfile, PublicFeedPost } from "@/lib/db";
 import { appUrl } from "@/lib/brand";
 import { safeHttpUrl, safeImageUrl } from "@/lib/safe-url";
@@ -27,9 +28,7 @@ export function PostDetail({
   const imageUrl = safeImageUrl(post.imageUrl);
   const websiteUrl = safeHttpUrl(brand?.websiteUrl ?? null);
   const shareUrl = `${appUrl()}/b/${post.brandSlug}/p/${post.id}`;
-  const usernameHref = post.ownerUsername
-    ? `/u/${encodeURIComponent(post.ownerUsername)}`
-    : `/b/${post.brandSlug}`;
+  const reportHref = `/report?url=${encodeURIComponent(shareUrl)}&slug=${encodeURIComponent(post.brandSlug)}`;
 
   return (
     <article className="overflow-hidden rounded-3xl border border-ink/8 bg-white/75 shadow-soft backdrop-blur-sm">
@@ -81,7 +80,7 @@ export function PostDetail({
           {post.ownerUsername ? (
             <p className="mt-1">
               <Link
-                href={usernameHref}
+                href={`/b/${post.brandSlug}`}
                 className="relative z-10 text-sm font-medium text-accent underline-offset-2 hover:underline"
               >
                 @{post.ownerUsername}
@@ -97,6 +96,7 @@ export function PostDetail({
 
         <div className="flex flex-wrap gap-3">
           <CopyLinkButton url={shareUrl} label="Copy post link" />
+          <ReportLink href={reportHref} variant="button" />
           {websiteUrl ? (
             <a
               href={websiteUrl}
