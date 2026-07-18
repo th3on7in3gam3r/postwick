@@ -46,8 +46,9 @@ export default async function StudioPage() {
           Studio
         </h1>
         <p className="mt-2 max-w-xl text-sm text-slate">
-          Link your Kerygma brand with a claim code, set a display username, and
-          edit captions for posts shared on Postwick.
+          {account
+            ? "Manage your display username and shared Postwick captions for linked Kerygma brands."
+            : "Sign-in alone is not enough — redeem a Kerygma claim code to link your brands."}
         </p>
       </header>
 

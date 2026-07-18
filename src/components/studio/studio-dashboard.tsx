@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { PostwickAccount, StudioBrand, StudioPost } from "@/lib/db";
+import { kerygmaUrl } from "@/lib/brand";
 
 export function StudioDashboard({
   account,
@@ -256,7 +257,22 @@ export function StudioDashboard({
           these brand names.
         </p>
         {brands.length === 0 ? (
-          <p className="mt-3 text-sm text-slate">No brands linked yet.</p>
+          <div className="mt-4 rounded-2xl border border-dashed border-ink/15 bg-fog/50 px-4 py-6 text-sm text-slate">
+            <p className="font-medium text-ink">No brands linked yet</p>
+            <p className="mt-1 leading-relaxed">
+              Your claim code did not attach any Kerygma brands. Generate a new
+              code from the brand’s Postwick card in Kerygma Integrations, then
+              contact support if this persists.
+            </p>
+            <a
+              href={`${kerygmaUrl()}/settings/integrations`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex font-medium text-ink underline-offset-2 hover:underline"
+            >
+              Open Kerygma integrations
+            </a>
+          </div>
         ) : (
           <ul className="mt-4 space-y-2">
             {brands.map((brand) => (
@@ -306,9 +322,22 @@ export function StudioDashboard({
           </p>
         ) : null}
         {posts.length === 0 ? (
-          <p className="mt-4 text-sm text-slate">
-            No shared posts yet. Share from Kerygma History or enable auto-share.
-          </p>
+          <div className="mt-4 rounded-2xl border border-dashed border-ink/15 bg-fog/50 px-4 py-6 text-sm text-slate">
+            <p className="font-medium text-ink">No shared posts yet</p>
+            <p className="mt-1 leading-relaxed">
+              Share published posts from Kerygma History, or use “Share all
+              published posts” on the Postwick integrations card. New publishes
+              auto-share when that connection is on.
+            </p>
+            <a
+              href={`${kerygmaUrl()}/settings/integrations`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex font-medium text-ink underline-offset-2 hover:underline"
+            >
+              Open Kerygma integrations
+            </a>
+          </div>
         ) : (
           <ul className="mt-5 space-y-5">
             {posts.map((post) => (
