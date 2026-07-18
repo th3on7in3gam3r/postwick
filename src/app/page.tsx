@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { FeedEmpty, PostCard } from "@/components/post-card";
 import { NicheFilter } from "@/components/niche-filter";
 import { kerygmaUrl } from "@/lib/brand";
@@ -6,7 +7,7 @@ import { getPublicFeedPosts, getPublicNiches } from "@/lib/db";
 import { sanitizeNiche } from "@/lib/env";
 
 export const metadata: Metadata = {
-  title: "Feed",
+  title: "Home",
   description:
     "Browse opt-in published posts from local brands on Postwick.",
 };
@@ -34,15 +35,25 @@ export default async function HomePage({
           Postwick
         </h1>
         <p className="mt-4 max-w-xl text-base leading-relaxed text-slate md:text-lg">
-          Real posts from local brands — shared when they choose. Create and
-          publish with Kerygma; show up here.
+          A public feed of posts brands choose to share. Browse below — owners
+          manage captions and usernames in Studio.
         </p>
-        <a
-          href={kerygmaUrl()}
-          className="mt-6 inline-flex rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-fog transition hover:bg-ink/90"
-        >
-          Create & share with Kerygma
-        </a>
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <Link
+            href="/studio"
+            className="inline-flex rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-fog transition hover:bg-ink/90"
+          >
+            Owner Studio
+          </Link>
+          <a
+            href={kerygmaUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-medium text-slate underline-offset-4 transition hover:text-ink hover:underline"
+          >
+            Create posts on Kerygma
+          </a>
+        </div>
       </section>
 
       <NicheFilter niches={niches} active={niche} />

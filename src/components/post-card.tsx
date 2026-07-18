@@ -87,7 +87,7 @@ export function PostCard({
 
 export function FeedEmpty({
   title = "No public posts yet",
-  description = "When brands on Kerygma Social opt in and share published posts, they will appear here.",
+  description = "When brands publish on Kerygma and share to Postwick, their posts appear here.",
 }: {
   title?: string;
   description?: string;
@@ -98,12 +98,22 @@ export function FeedEmpty({
       <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-slate">
         {description}
       </p>
-      <a
-        href={kerygmaUrl()}
-        className="mt-6 inline-flex rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-fog transition hover:bg-ink/90"
-      >
-        Create & share with Kerygma
-      </a>
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+        <a
+          href={kerygmaUrl()}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-fog transition hover:bg-ink/90"
+        >
+          Start on Kerygma
+        </a>
+        <Link
+          href="/studio"
+          className="text-sm font-medium text-slate underline-offset-4 hover:text-ink hover:underline"
+        >
+          Already sharing? Open Studio
+        </Link>
+      </div>
     </div>
   );
 }

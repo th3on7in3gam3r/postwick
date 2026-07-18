@@ -45,14 +45,6 @@ export function SiteHeader() {
           <Link href="/studio" className={navLinkClass}>
             Studio
           </Link>
-          <a
-            href={kerygmaUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`hidden md:inline ${navLinkClass}`}
-          >
-            Kerygma
-          </a>
         </div>
 
         {isClerkConfigured() ? (
@@ -73,21 +65,21 @@ export function SiteFooter() {
   return (
     <footer className="mx-auto mt-16 flex w-full max-w-5xl flex-col gap-3 border-t border-ink/10 px-5 py-8 text-sm text-slate md:flex-row md:items-center md:justify-between md:px-8">
       <p>
-        Postwick — public posts from brands on{" "}
-        <a href={kerygmaUrl()} className="text-ink underline-offset-2 hover:underline">
-          Kerygma Social
-        </a>
-        .
-      </p>
-      <div className="flex flex-wrap gap-4">
+        Posts are created and published on{" "}
         <a
           href={kerygmaUrl()}
-          className="hover:text-ink"
+          className="text-ink underline-offset-2 hover:underline"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Create with Kerygma
+          Kerygma Social
         </a>
+        , then shared here when brands opt in.
+      </p>
+      <div className="flex flex-wrap gap-4">
+        <Link href="/studio" className="hover:text-ink">
+          Studio
+        </Link>
         <Link href="/report" className="hover:text-ink">
           Report
         </Link>
