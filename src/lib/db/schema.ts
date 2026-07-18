@@ -100,3 +100,23 @@ export const postwickPageViews = pgTable(
     ),
   }),
 );
+
+/** Partner API keys for Cadence / growth-stack (hash only stored). */
+export const postwickApiKeys = pgTable(
+  "postwick_api_keys",
+  {
+    id: text("id").primaryKey(),
+    clerkUserId: text("clerk_user_id").notNull(),
+    name: text("name").notNull().default("Cadence"),
+    keyPrefix: text("key_prefix").notNull(),
+    keyHash: text("key_hash").notNull(),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true, mode: "string" }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true, mode: "string" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    keyHashIdx: uniqueIndex("postwick_api_keys_key_hash_idx").on(table.keyHash),
+  }),
+);

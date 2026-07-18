@@ -51,6 +51,18 @@ async function ensureSchema() {
         path,
         viewed_on
       )`;
+    await sql`
+      CREATE TABLE IF NOT EXISTS postwick_api_keys (
+        id TEXT PRIMARY KEY,
+        clerk_user_id TEXT NOT NULL,
+        name TEXT NOT NULL DEFAULT 'Cadence',
+        key_prefix TEXT NOT NULL,
+        key_hash TEXT NOT NULL UNIQUE,
+        last_used_at TIMESTAMPTZ,
+        revoked_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_postwick_api_keys_clerk_user_id ON postwick_api_keys(clerk_user_id)`;
   } catch (error) {
     // Read-only roles cannot create tables; Kerygma ensureSchema owns migrations.
     console.warn(

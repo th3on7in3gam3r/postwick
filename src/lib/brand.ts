@@ -17,3 +17,11 @@ export function supportEmail() {
     "support@kerygmasocial.com"
   );
 }
+
+/** Cadence Settings — Growth stack API keys live here. */
+export function cadenceSettingsUrl() {
+  return (
+    process.env.NEXT_PUBLIC_CADENCE_SETTINGS_URL?.trim().replace(/\/$/, "") ||
+    "https://cadence.biblefunland.com/app/settings"
+  );
+}

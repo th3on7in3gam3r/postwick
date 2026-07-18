@@ -14,6 +14,13 @@ export {
   type PublicFeedPost,
 } from "./queries";
 export {
+  authenticateWithApiKey,
+  createApiKeyForClerkUser,
+  listApiKeysForClerkUser,
+  revokeApiKeyForClerkUser,
+  type ApiKeyRecord,
+} from "./api-keys";
+export {
   getPostwickAccountByClerkId,
   getStudioBrands,
   getStudioPosts,

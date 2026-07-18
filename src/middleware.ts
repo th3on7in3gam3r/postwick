@@ -15,6 +15,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/feed",
   "/api/health",
   "/api/analytics/view",
+  "/api/v1/(.*)",
   "/robots.txt",
   "/sitemap.xml",
 ]);

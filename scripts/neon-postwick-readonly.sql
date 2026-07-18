@@ -47,6 +47,7 @@ GRANT SELECT (
 GRANT SELECT, INSERT, UPDATE ON postwick_claim_codes TO postwick_app;
 GRANT SELECT, INSERT, UPDATE ON postwick_accounts TO postwick_app;
 GRANT SELECT, INSERT, UPDATE ON postwick_page_views TO postwick_app;
+GRANT SELECT, INSERT, UPDATE ON postwick_api_keys TO postwick_app;
 GRANT UPDATE (content, is_public, updated_at) ON posts TO postwick_app;
 
 -- Optional legacy read-only role (feed only — no Studio writes)

@@ -18,6 +18,7 @@ export type StudioBrand = {
   name: string;
   publicSlug: string | null;
   publicNiche: string | null;
+  publicCity: string | null;
   isPublic: boolean;
 };
 
@@ -252,6 +253,7 @@ export async function getStudioBrands(
       name: brands.name,
       publicSlug: brands.publicSlug,
       publicNiche: brands.publicNiche,
+      publicCity: brands.publicCity,
       isPublic: brands.isPublic,
     })
     .from(brands)

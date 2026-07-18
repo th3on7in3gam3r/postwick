@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { PostwickAccount, StudioBrand, StudioPost, StudioViewsSummary } from "@/lib/db";
 import { kerygmaUrl } from "@/lib/brand";
 import { AddBrandClaimForm } from "@/components/studio/add-brand-claim-form";
+import { ApiKeysPanel } from "@/components/studio/api-keys-panel";
 
 export function StudioDashboard({
   account,
@@ -251,6 +252,8 @@ export function StudioDashboard({
           </p>
         ) : null}
       </section>
+
+      <ApiKeysPanel />
 
       <section className="rounded-3xl border border-ink/8 bg-white/75 p-6 shadow-soft backdrop-blur-sm md:p-8">
         <h2 className="font-display text-xl text-ink">Linked brands</h2>
