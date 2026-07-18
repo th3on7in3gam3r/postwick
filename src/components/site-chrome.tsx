@@ -1,27 +1,67 @@
 import Link from "next/link";
+import { AuthNav } from "@/components/auth-nav";
 import { kerygmaUrl } from "@/lib/brand";
+
+function isClerkConfigured() {
+  return Boolean(
+    process.env.CLERK_SECRET_KEY?.trim() &&
+      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim(),
+  );
+}
+
+const navLinkClass =
+  "rounded-lg px-2.5 py-1.5 font-medium text-slate transition hover:bg-ink/[0.04] hover:text-ink";
 
 export function SiteHeader() {
   return (
-    <header className="mx-auto flex w-full max-w-5xl items-center justify-between px-5 py-6 md:px-8">
-      <Link href="/" className="group flex items-baseline gap-2">
-        <span className="font-display text-2xl tracking-tight text-ink md:text-[1.75rem]">
+    <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-6 px-5 py-5 md:px-8 md:py-6">
+      {/* Hard nav: Clerk catch-all sign-in routes can trap Next.js <Link> soft nav to /. */}
+      <a
+        href="/"
+        className="group flex shrink-0 items-center gap-2.5"
+        aria-label="Postwick home"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/logo.svg"
+          alt=""
+          width={32}
+          height={32}
+          className="h-8 w-8 rounded-[0.55rem]"
+        />
+        <span className="font-display text-[1.35rem] tracking-tight text-ink md:text-2xl">
           Postwick
         </span>
-        <span className="hidden text-xs font-medium uppercase tracking-[0.16em] text-slate sm:inline">
-          Local posts
-        </span>
-      </Link>
-      <nav className="flex items-center gap-4 text-sm text-slate">
-        <Link href="/" className="transition hover:text-ink">
-          Feed
-        </Link>
-        <a
-          href={kerygmaUrl()}
-          className="rounded-full bg-ink px-3.5 py-1.5 text-xs font-medium text-fog transition hover:bg-ink/90"
-        >
-          Create with Kerygma
-        </a>
+      </a>
+
+      <nav
+        className="flex min-w-0 items-center gap-1 text-sm sm:gap-2"
+        aria-label="Primary"
+      >
+        <div className="flex items-center gap-0.5 sm:gap-1">
+          <a href="/" className={navLinkClass}>
+            Feed
+          </a>
+          <Link href="/studio" className={navLinkClass}>
+            Studio
+          </Link>
+          <a
+            href={kerygmaUrl()}
+            className={`hidden md:inline ${navLinkClass}`}
+          >
+            Create
+          </a>
+        </div>
+
+        {isClerkConfigured() ? (
+          <>
+            <span
+              className="mx-1.5 hidden h-4 w-px bg-ink/10 sm:block"
+              aria-hidden
+            />
+            <AuthNav />
+          </>
+        ) : null}
       </nav>
     </header>
   );
@@ -37,7 +77,15 @@ export function SiteFooter() {
         </a>
         .
       </p>
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4">
+        <a
+          href={kerygmaUrl()}
+          className="hover:text-ink"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Create with Kerygma
+        </a>
         <Link href="/report" className="hover:text-ink">
           Report
         </Link>

@@ -1,6 +1,7 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import { sanitizeNiche } from "@/lib/env";
 import { getDb } from "./client";
+import { getOwnerUsernameForBrandUserId, getOwnerUsernamesByBrandIds } from "./owner";
 import { brands, posts } from "./schema";
 
 export type PublicFeedPost = {
@@ -12,6 +13,7 @@ export type PublicFeedPost = {
   brandName: string;
   brandSlug: string;
   brandNiche: string | null;
+  ownerUsername: string | null;
 };
 
 export type PublicBrandProfile = {
@@ -20,6 +22,7 @@ export type PublicBrandProfile = {
   description: string | null;
   publicSlug: string;
   publicNiche: string | null;
+  ownerUsername: string | null;
 };
 
 const publicGates = and(
@@ -51,6 +54,7 @@ export async function getPublicFeedPosts(options?: {
         content: posts.content,
         imageUrl: posts.imageUrl,
         publishedAt: posts.publishedAt,
+        brandId: brands.id,
         brandName: brands.name,
         brandSlug: brands.publicSlug,
         brandNiche: brands.publicNiche,
@@ -60,6 +64,10 @@ export async function getPublicFeedPosts(options?: {
       .where(and(...conditions))
       .orderBy(desc(posts.publishedAt), desc(posts.id))
       .limit(limit);
+
+    const usernames = await getOwnerUsernamesByBrandIds(
+      rows.map((row) => row.brandId),
+    );
 
     return rows
       .filter((row) => Boolean(row.brandSlug))
@@ -72,6 +80,7 @@ export async function getPublicFeedPosts(options?: {
         brandName: row.brandName,
         brandSlug: row.brandSlug!,
         brandNiche: row.brandNiche,
+        ownerUsername: usernames.get(row.brandId) ?? null,
       }));
   } catch {
     return [];
@@ -114,12 +123,15 @@ export async function getPublicBrandBySlug(
     const row = rows[0];
     if (!row?.publicSlug) return null;
 
+    const ownerUsername = await getOwnerUsernameForBrandUserId(row.userId);
+
     return {
       name: row.name,
       websiteUrl: row.websiteUrl,
       description: row.description,
       publicSlug: row.publicSlug,
       publicNiche: row.publicNiche,
+      ownerUsername,
     };
   } catch {
     return null;
@@ -141,6 +153,7 @@ export async function getPublicPostsByBrandSlug(
         content: posts.content,
         imageUrl: posts.imageUrl,
         publishedAt: posts.publishedAt,
+        brandId: brands.id,
         brandName: brands.name,
         brandSlug: brands.publicSlug,
         brandNiche: brands.publicNiche,
@@ -150,6 +163,10 @@ export async function getPublicPostsByBrandSlug(
       .where(and(publicGates, eq(brands.publicSlug, slug)))
       .orderBy(desc(posts.publishedAt), desc(posts.id))
       .limit(limit);
+
+    const usernames = await getOwnerUsernamesByBrandIds(
+      rows.map((row) => row.brandId),
+    );
 
     return rows
       .filter((row) => Boolean(row.brandSlug))
@@ -162,6 +179,7 @@ export async function getPublicPostsByBrandSlug(
         brandName: row.brandName,
         brandSlug: row.brandSlug!,
         brandNiche: row.brandNiche,
+        ownerUsername: usernames.get(row.brandId) ?? null,
       }));
   } catch {
     return [];

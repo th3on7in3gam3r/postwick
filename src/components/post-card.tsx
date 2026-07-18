@@ -61,9 +61,14 @@ export function PostCard({
           {showBrand ? (
             <Link
               href={`/b/${post.brandSlug}`}
-              className="inline-flex text-sm font-medium text-ink underline-offset-4 hover:underline"
+              className="inline-flex flex-col text-sm font-medium text-ink underline-offset-4 hover:underline"
             >
-              {post.brandName}
+              <span>{post.brandName}</span>
+              {post.ownerUsername ? (
+                <span className="text-xs font-normal text-slate">
+                  @{post.ownerUsername}
+                </span>
+              ) : null}
             </Link>
           ) : (
             <span />

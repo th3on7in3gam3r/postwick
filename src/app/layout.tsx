@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Fraunces, DM_Sans } from "next/font/google";
 import { SiteFooter, SiteHeader } from "@/components/site-chrome";
 import { appUrl } from "@/lib/brand";
@@ -24,21 +25,52 @@ export const metadata: Metadata = {
   },
   description:
     "Discover local business posts shared from Kerygma Social — a public feed for brands that opt in.",
+  icons: {
+    icon: [
+      { url: "/logo.svg", type: "image/svg+xml" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
+
+function isClerkConfigured() {
+  return Boolean(
+    process.env.CLERK_SECRET_KEY?.trim() &&
+      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim(),
+  );
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const content = (
+    <>
+      <SiteHeader />
+      <main className="mx-auto w-full max-w-5xl px-5 pb-8 md:px-8">
+        {children}
+      </main>
+      <SiteFooter />
+    </>
+  );
+
   return (
     <html lang="en">
       <body className={`${display.variable} ${sans.variable} antialiased`}>
-        <SiteHeader />
-        <main className="mx-auto w-full max-w-5xl px-5 pb-8 md:px-8">
-          {children}
-        </main>
-        <SiteFooter />
+        {isClerkConfigured() ? (
+          <ClerkProvider
+            signInUrl="/sign-in"
+            signUpUrl="/sign-up"
+            signInFallbackRedirectUrl="/studio"
+            signUpFallbackRedirectUrl="/studio"
+          >
+            {content}
+          </ClerkProvider>
+        ) : (
+          content
+        )}
       </body>
     </html>
   );

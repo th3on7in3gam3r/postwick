@@ -51,6 +51,11 @@ export default async function BrandPage({ params }: PageProps) {
         <h1 className="mt-3 font-display text-[clamp(2rem,5vw,3rem)] tracking-tight text-ink">
           {brand.name}
         </h1>
+        {brand.ownerUsername ? (
+          <p className="mt-2 text-sm font-medium text-slate">
+            @{brand.ownerUsername}
+          </p>
+        ) : null}
         {brand.description ? (
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate">
             {brand.description}
