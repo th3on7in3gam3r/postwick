@@ -1,12 +1,14 @@
 export { getDb } from "./client";
 export {
   getPublicBrandBySlug,
+  getPublicBrandSlugByUsername,
   getPublicBrandSlugs,
   getPublicCities,
   getPublicFeedPosts,
   getPublicNiches,
   getPublicPostByBrandSlugAndId,
   getPublicPostsByBrandSlug,
+  getRecentPublicFeedPosts,
   type PublicBrandProfile,
   type PublicFeedPage,
   type PublicFeedPost,

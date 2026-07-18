@@ -35,7 +35,7 @@ export function ClaimCodeForm({ kerygmaUrl }: { kerygmaUrl: string }) {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-3xl border border-ink/8 bg-white/80 p-8 shadow-soft">
+      <section className="rounded-3xl border border-ink/8 bg-white/75 p-8 shadow-soft backdrop-blur-sm">
         <h2 className="font-display text-2xl text-ink">Link your Kerygma brand</h2>
         <p className="mt-2 max-w-lg text-sm leading-relaxed text-slate">
           Studio is for brand owners only. Enter a one-time claim code from

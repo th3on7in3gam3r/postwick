@@ -131,7 +131,7 @@ export function StudioDashboard({
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-ink/8 bg-white/80 p-6 shadow-soft md:p-8">
+      <section className="rounded-3xl border border-ink/8 bg-white/75 p-6 shadow-soft backdrop-blur-sm md:p-8">
         <h2 className="font-display text-xl text-ink">Claim path checklist</h2>
         <p className="mt-1 text-sm text-slate">
           Confirm the owner loop end to end — claim code, username, then a
@@ -196,7 +196,7 @@ export function StudioDashboard({
         ) : null}
       </section>
 
-      <section className="rounded-3xl border border-ink/8 bg-white/80 p-6 shadow-soft md:p-8">
+      <section className="rounded-3xl border border-ink/8 bg-white/75 p-6 shadow-soft backdrop-blur-sm md:p-8">
         <h2 className="font-display text-xl text-ink">Display username</h2>
         <p className="mt-1 text-sm leading-relaxed text-slate">
           Your public <span className="font-medium text-ink">@handle</span> as
@@ -252,7 +252,7 @@ export function StudioDashboard({
         ) : null}
       </section>
 
-      <section className="rounded-3xl border border-ink/8 bg-white/80 p-6 shadow-soft md:p-8">
+      <section className="rounded-3xl border border-ink/8 bg-white/75 p-6 shadow-soft backdrop-blur-sm md:p-8">
         <h2 className="font-display text-xl text-ink">Linked brands</h2>
         <p className="mt-1 text-sm leading-relaxed text-slate">
           These are your Kerygma businesses linked via the claim code — each has
@@ -301,7 +301,7 @@ export function StudioDashboard({
         <AddBrandClaimForm />
       </section>
 
-      <section className="rounded-3xl border border-ink/8 bg-white/80 p-6 shadow-soft md:p-8">
+      <section className="rounded-3xl border border-ink/8 bg-white/75 p-6 shadow-soft backdrop-blur-sm md:p-8">
         <h2 className="font-display text-xl text-ink">Views</h2>
         <p className="mt-1 text-sm text-slate">
           Public page views on Postwick (no visitor identity). Totals refresh as
@@ -326,7 +326,7 @@ export function StudioDashboard({
         )}
       </section>
 
-      <section className="rounded-3xl border border-ink/8 bg-white/80 p-6 shadow-soft md:p-8">
+      <section className="rounded-3xl border border-ink/8 bg-white/75 p-6 shadow-soft backdrop-blur-sm md:p-8">
         <h2 className="font-display text-xl text-ink">Shared posts</h2>
         <p className="mt-1 text-sm text-slate">
           Edit captions or remove posts from the public Postwick feed. After

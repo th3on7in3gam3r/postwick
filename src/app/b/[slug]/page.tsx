@@ -54,7 +54,7 @@ export default async function BrandPage({ params }: PageProps) {
   return (
     <div className="space-y-10">
       <ViewBeacon brandSlug={brand.publicSlug} path={`/b/${brand.publicSlug}`} />
-      <section className="rounded-3xl border border-ink/8 bg-white/75 p-8 shadow-soft md:p-10">
+      <section className="rounded-3xl border border-ink/8 bg-white/75 p-8 shadow-soft backdrop-blur-sm md:p-10">
         <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-accent">
           {brand.publicNiche ? <span>{brand.publicNiche}</span> : null}
           {brand.publicNiche && brand.publicCity ? <span>·</span> : null}
@@ -64,8 +64,13 @@ export default async function BrandPage({ params }: PageProps) {
           {brand.name}
         </h1>
         {brand.ownerUsername ? (
-          <p className="mt-2 text-sm font-medium text-slate">
-            @{brand.ownerUsername}
+          <p className="mt-2">
+            <Link
+              href={`/u/${encodeURIComponent(brand.ownerUsername)}`}
+              className="text-sm font-medium text-accent underline-offset-2 hover:underline"
+            >
+              @{brand.ownerUsername}
+            </Link>
           </p>
         ) : null}
         {brand.description ? (
@@ -110,6 +115,7 @@ export default async function BrandPage({ params }: PageProps) {
           initialPosts={page.posts}
           initialHasMore={page.hasMore}
           initialNextOffset={page.nextOffset}
+          initialTotal={page.total}
           source={{ kind: "brand", slug: brand.publicSlug }}
           showBrand={false}
         />

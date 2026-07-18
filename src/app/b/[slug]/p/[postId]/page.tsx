@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CopyLinkButton } from "@/components/copy-link-button";
-import { PostCard } from "@/components/post-card";
+import { PostDetail } from "@/components/post-detail";
 import { ViewBeacon } from "@/components/view-beacon";
 import { appUrl } from "@/lib/brand";
-import { getPublicPostByBrandSlugAndId } from "@/lib/db";
+import {
+  getPublicBrandBySlug,
+  getPublicPostByBrandSlugAndId,
+} from "@/lib/db";
 import { sharePageMetadata, truncateForMeta } from "@/lib/seo";
 
 type PageProps = {
@@ -34,6 +37,7 @@ export default async function BrandPostPage({ params }: PageProps) {
   const post = await getPublicPostByBrandSlugAndId(params.slug, params.postId);
   if (!post) notFound();
 
+  const brand = await getPublicBrandBySlug(post.brandSlug);
   const shareUrl = `${appUrl()}/b/${post.brandSlug}/p/${post.id}`;
 
   return (
@@ -51,10 +55,14 @@ export default async function BrandPostPage({ params }: PageProps) {
           >
             ← {post.brandName}
           </Link>
+          <span className="mx-2 text-ink/20">·</span>
+          <Link href="/" className="hover:text-ink hover:underline">
+            Home
+          </Link>
         </p>
         <CopyLinkButton url={shareUrl} label="Copy post link" />
       </div>
-      <PostCard post={post} />
+      <PostDetail post={post} brand={brand} />
     </div>
   );
 }

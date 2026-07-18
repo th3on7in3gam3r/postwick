@@ -28,7 +28,7 @@ export function CopyLinkButton({
 
   const defaultClass =
     variant === "text"
-      ? "text-xs text-slate underline-offset-2 hover:text-ink hover:underline"
+      ? "text-xs font-medium text-slate/80 underline-offset-2 transition hover:text-ink hover:underline"
       : "inline-flex items-center gap-2 rounded-full border border-ink/15 bg-fog px-4 py-2 text-sm font-medium text-ink transition hover:border-ink/30";
 
   return (

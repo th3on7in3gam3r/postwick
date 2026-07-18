@@ -1,8 +1,12 @@
-import { and, desc, eq, sql } from "drizzle-orm";
-import { sanitizeCity, sanitizeNiche } from "@/lib/env";
+import { and, count, desc, eq, gte, ilike, inArray, or, sql } from "drizzle-orm";
+import {
+  sanitizeCity,
+  sanitizeNiche,
+  sanitizeSearchQuery,
+} from "@/lib/env";
 import { getDb } from "./client";
 import { getOwnerUsernameForBrandUserId, getOwnerUsernamesByBrandIds } from "./owner";
-import { brands, posts } from "./schema";
+import { brands, posts, postwickAccounts } from "./schema";
 
 export type PublicFeedPost = {
   id: string;
@@ -31,6 +35,7 @@ export type PublicFeedPage = {
   posts: PublicFeedPost[];
   hasMore: boolean;
   nextOffset: number | null;
+  total: number;
 };
 
 const publicGates = and(
@@ -50,6 +55,10 @@ function clampLimit(limit?: number) {
 function clampOffset(offset?: number) {
   if (offset == null || !Number.isFinite(offset) || offset < 0) return 0;
   return Math.trunc(offset);
+}
+
+function emptyPage(): PublicFeedPage {
+  return { posts: [], hasMore: false, nextOffset: null, total: 0 };
 }
 
 type FeedRow = {
@@ -86,30 +95,58 @@ async function mapFeedRows(rows: FeedRow[]): Promise<PublicFeedPost[]> {
     }));
 }
 
+function buildHomeFeedConditions(options?: {
+  niche?: string;
+  city?: string;
+  q?: string;
+}) {
+  const niche = sanitizeNiche(options?.niche);
+  const city = sanitizeCity(options?.city);
+  const q = sanitizeSearchQuery(options?.q);
+  const conditions = [publicGates];
+
+  if (niche) {
+    conditions.push(eq(brands.publicNiche, niche));
+  }
+  if (city) {
+    conditions.push(eq(brands.publicCity, city));
+  }
+  if (q) {
+    const pattern = `%${q}%`;
+    conditions.push(
+      or(ilike(posts.content, pattern), ilike(brands.name, pattern))!,
+    );
+  }
+
+  return { conditions, niche, city, q };
+}
+
 export async function getPublicFeedPosts(options?: {
   niche?: string;
   city?: string;
+  q?: string;
   limit?: number;
   offset?: number;
 }): Promise<PublicFeedPage> {
   if (!process.env.DATABASE_URL) {
-    return { posts: [], hasMore: false, nextOffset: null };
+    return emptyPage();
   }
 
   const limit = clampLimit(options?.limit);
   const offset = clampOffset(options?.offset);
-  const niche = sanitizeNiche(options?.niche);
-  const city = sanitizeCity(options?.city);
+  const { conditions } = buildHomeFeedConditions(options);
+  const where = and(...conditions);
 
   try {
     const db = await getDb();
-    const conditions = [publicGates];
-    if (niche) {
-      conditions.push(eq(brands.publicNiche, niche));
-    }
-    if (city) {
-      conditions.push(eq(brands.publicCity, city));
-    }
+
+    const [totalRow] = await db
+      .select({ value: count() })
+      .from(posts)
+      .innerJoin(brands, eq(brands.id, posts.brandId))
+      .where(where);
+
+    const total = Number(totalRow?.value ?? 0);
 
     const rows = await db
       .select({
@@ -126,7 +163,7 @@ export async function getPublicFeedPosts(options?: {
       })
       .from(posts)
       .innerJoin(brands, eq(brands.id, posts.brandId))
-      .where(and(...conditions))
+      .where(where)
       .orderBy(desc(posts.publishedAt), desc(posts.id))
       .limit(limit + 1)
       .offset(offset);
@@ -139,9 +176,10 @@ export async function getPublicFeedPosts(options?: {
       posts: mapped,
       hasMore,
       nextOffset: hasMore ? offset + limit : null,
+      total,
     };
   } catch {
-    return { posts: [], hasMore: false, nextOffset: null };
+    return emptyPage();
   }
 }
 
@@ -222,14 +260,24 @@ export async function getPublicPostsByBrandSlug(
   options?: { limit?: number; offset?: number },
 ): Promise<PublicFeedPage> {
   if (!process.env.DATABASE_URL) {
-    return { posts: [], hasMore: false, nextOffset: null };
+    return emptyPage();
   }
 
   const limit = clampLimit(options?.limit);
   const offset = clampOffset(options?.offset);
+  const where = and(publicGates, eq(brands.publicSlug, slug));
 
   try {
     const db = await getDb();
+
+    const [totalRow] = await db
+      .select({ value: count() })
+      .from(posts)
+      .innerJoin(brands, eq(brands.id, posts.brandId))
+      .where(where);
+
+    const total = Number(totalRow?.value ?? 0);
+
     const rows = await db
       .select({
         id: posts.id,
@@ -245,7 +293,7 @@ export async function getPublicPostsByBrandSlug(
       })
       .from(posts)
       .innerJoin(brands, eq(brands.id, posts.brandId))
-      .where(and(publicGates, eq(brands.publicSlug, slug)))
+      .where(where)
       .orderBy(desc(posts.publishedAt), desc(posts.id))
       .limit(limit + 1)
       .offset(offset);
@@ -258,9 +306,10 @@ export async function getPublicPostsByBrandSlug(
       posts: mapped,
       hasMore,
       nextOffset: hasMore ? offset + limit : null,
+      total,
     };
   } catch {
-    return { posts: [], hasMore: false, nextOffset: null };
+    return emptyPage();
   }
 }
 
@@ -314,6 +363,99 @@ export async function getPublicBrandSlugs(limit = 500): Promise<string[]> {
     return rows
       .map((row) => row.slug)
       .filter((slug): slug is string => Boolean(slug));
+  } catch {
+    return [];
+  }
+}
+
+function parseBrandIds(raw: string | null | undefined): string[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (id): id is string => typeof id === "string" && id.length > 0,
+    );
+  } catch {
+    return [];
+  }
+}
+
+/** Resolve Studio @username → first public brand slug for that owner. */
+export async function getPublicBrandSlugByUsername(
+  username: string,
+): Promise<string | null> {
+  if (!process.env.DATABASE_URL) return null;
+  const normalized = username.trim().toLowerCase().replace(/^@/, "");
+  if (!normalized || normalized.length > 24) return null;
+
+  try {
+    const db = await getDb();
+    const accounts = await db
+      .select({ brandIds: postwickAccounts.brandIds })
+      .from(postwickAccounts)
+      .where(eq(postwickAccounts.username, normalized))
+      .limit(1);
+
+    const brandIds = parseBrandIds(accounts[0]?.brandIds);
+    if (brandIds.length === 0) return null;
+
+    const rows = await db
+      .select({ slug: brands.publicSlug })
+      .from(brands)
+      .where(
+        and(
+          inArray(brands.id, brandIds),
+          eq(brands.isPublic, true),
+          sql`${brands.publicSlug} IS NOT NULL`,
+        ),
+      )
+      .limit(1);
+
+    return rows[0]?.slug ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Recent public posts for the Home “New this week” strip. */
+export async function getRecentPublicFeedPosts(options?: {
+  days?: number;
+  limit?: number;
+  niche?: string;
+  city?: string;
+  q?: string;
+}): Promise<PublicFeedPost[]> {
+  if (!process.env.DATABASE_URL) return [];
+
+  const days = Math.min(Math.max(options?.days ?? 7, 1), 30);
+  const limit = Math.min(Math.max(options?.limit ?? 12, 1), 24);
+  const { conditions } = buildHomeFeedConditions(options);
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  conditions.push(gte(posts.publishedAt, since));
+
+  try {
+    const db = await getDb();
+    const rows = await db
+      .select({
+        id: posts.id,
+        platform: posts.platform,
+        content: posts.content,
+        imageUrl: posts.imageUrl,
+        publishedAt: posts.publishedAt,
+        brandId: brands.id,
+        brandName: brands.name,
+        brandSlug: brands.publicSlug,
+        brandNiche: brands.publicNiche,
+        brandCity: brands.publicCity,
+      })
+      .from(posts)
+      .innerJoin(brands, eq(brands.id, posts.brandId))
+      .where(and(...conditions))
+      .orderBy(desc(posts.publishedAt), desc(posts.id))
+      .limit(limit);
+
+    return mapFeedRows(rows);
   } catch {
     return [];
   }

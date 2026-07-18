@@ -49,7 +49,7 @@ export default function RootLayout({
   const content = (
     <>
       <SiteHeader />
-      <main className="mx-auto w-full max-w-5xl px-5 pb-8 md:px-8">
+      <main className="mx-auto w-full max-w-5xl bg-transparent px-5 pb-8 md:px-8">
         {children}
       </main>
       <SiteFooter />

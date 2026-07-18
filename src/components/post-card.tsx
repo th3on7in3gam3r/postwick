@@ -15,6 +15,9 @@ function formatWhen(value: string | null) {
   });
 }
 
+const actionClass =
+  "text-xs font-medium text-slate/80 underline-offset-2 transition hover:text-ink hover:underline";
+
 export function PostCard({
   post,
   showBrand = true,
@@ -31,73 +34,81 @@ export function PostCard({
   return (
     <article
       id={`post-${post.id}`}
-      className="overflow-hidden rounded-2xl border border-ink/8 bg-white/80 shadow-soft backdrop-blur-sm"
+      className="cursor-pointer overflow-hidden rounded-2xl border border-ink/8 bg-white/75 shadow-soft backdrop-blur-sm transition duration-200 ease-out hover:-translate-y-1 hover:shadow-lg"
     >
       <Link href={postPath} className="block">
         {imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={imageUrl}
-            alt=""
-            className="aspect-[4/3] w-full object-cover"
-            referrerPolicy="no-referrer"
-          />
+          <div className="aspect-[4/3] w-full bg-mist">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={imageUrl}
+              alt=""
+              className="h-full w-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+          </div>
         ) : (
-          <div className="flex aspect-[4/3] items-end bg-gradient-to-br from-mist via-accent-soft to-fog p-5">
+          <div className="flex aspect-[4/3] w-full items-end bg-gradient-to-br from-mist via-accent-soft to-fog p-5">
             <p className="font-display text-xl italic text-ink/70 line-clamp-3">
               {post.content}
             </p>
           </div>
         )}
-      </Link>
-      <div className="space-y-3 p-5">
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="rounded-full bg-accent-soft px-2.5 py-1 font-medium uppercase tracking-wide text-accent">
-            {post.platform}
-          </span>
-          {post.brandNiche ? (
-            <span className="text-slate">{post.brandNiche}</span>
+        <div className="space-y-3 px-5 pt-5">
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className="rounded-full bg-accent-soft px-2.5 py-1 font-medium uppercase tracking-wide text-accent">
+              {post.platform}
+            </span>
+            {post.brandNiche ? (
+              <span className="text-slate">{post.brandNiche}</span>
+            ) : null}
+            {post.brandCity ? (
+              <span className="text-slate">{post.brandCity}</span>
+            ) : null}
+            {when ? <span className="text-slate/80">{when}</span> : null}
+          </div>
+          {imageUrl ? (
+            <div className="space-y-1.5">
+              <p className="text-sm leading-relaxed text-ink/90 line-clamp-4">
+                {post.content}
+              </p>
+              <span className="text-sm font-medium text-accent">Read more</span>
+            </div>
           ) : null}
-          {post.brandCity ? (
-            <span className="text-slate">{post.brandCity}</span>
-          ) : null}
-          {when ? <span className="text-slate/80">{when}</span> : null}
         </div>
-        {imageUrl ? (
-          <p className="text-sm leading-relaxed text-ink/90 line-clamp-4">
-            {post.content}
-          </p>
-        ) : null}
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          {showBrand ? (
+      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-2 px-5 pb-5 pt-3">
+        {showBrand ? (
+          <div className="relative z-10 inline-flex flex-col text-sm">
             <Link
               href={`/b/${post.brandSlug}`}
-              className="inline-flex flex-col text-sm font-medium text-ink underline-offset-4 hover:underline"
+              className="font-medium text-ink underline-offset-4 hover:underline"
             >
-              <span>{post.brandName}</span>
-              {post.ownerUsername ? (
-                <span className="text-xs font-normal text-slate">
-                  @{post.ownerUsername}
-                </span>
-              ) : null}
+              {post.brandName}
             </Link>
-          ) : (
-            <span />
-          )}
-          <div className="flex items-center gap-3">
-            <CopyLinkButton url={postUrl} label="Copy link" variant="text" />
-            <Link
-              href={reportHref}
-              className="text-xs text-slate underline-offset-2 hover:text-ink hover:underline"
-            >
-              Report
-            </Link>
+            {post.ownerUsername ? (
+              <Link
+                href={`/u/${encodeURIComponent(post.ownerUsername)}`}
+                className="text-xs font-medium text-accent underline-offset-2 hover:underline"
+              >
+                @{post.ownerUsername}
+              </Link>
+            ) : null}
           </div>
+        ) : (
+          <span />
+        )}
+        <div className="flex items-center gap-3 border-l border-ink/10 pl-3">
+          <CopyLinkButton url={postUrl} label="Copy link" variant="text" />
+          <Link href={reportHref} className={actionClass}>
+            Report
+          </Link>
         </div>
       </div>
     </article>
   );
 }
+
 export function FeedEmpty({
   title = "No public posts yet",
   description = "When brands publish on Kerygma and share to Postwick, their posts appear here.",
@@ -120,12 +131,32 @@ export function FeedEmpty({
         >
           Start on Kerygma
         </a>
-        <Link
+        <a
           href="/studio"
           className="text-sm font-medium text-slate underline-offset-4 hover:text-ink hover:underline"
         >
           Already sharing? Open Studio
-        </Link>
+        </a>
+      </div>
+    </div>
+  );
+}
+
+export function FilterEmpty() {
+  return (
+    <div className="rounded-2xl border border-dashed border-ink/15 bg-white/50 px-6 py-16 text-center">
+      <h2 className="font-display text-2xl text-ink">No matching posts</h2>
+      <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-slate">
+        Nothing matches these filters. Try another niche, city, or search — or
+        clear filters to see the full feed.
+      </p>
+      <div className="mt-6">
+        <a
+          href="/"
+          className="inline-flex rounded-full border border-ink/15 bg-white/80 px-5 py-2.5 text-sm font-medium text-ink transition hover:border-ink/30"
+        >
+          Clear filters
+        </a>
       </div>
     </div>
   );

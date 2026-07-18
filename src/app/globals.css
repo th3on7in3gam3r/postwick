@@ -13,12 +13,18 @@
   --foreground: var(--ink);
 }
 
+html {
+  min-height: 100%;
+}
+
 body {
   color: var(--ink);
   background:
-    radial-gradient(ellipse 90% 60% at 10% -10%, #dbeafe 0%, transparent 55%),
-    radial-gradient(ellipse 70% 50% at 100% 0%, #ccfbf1 0%, transparent 45%),
+    radial-gradient(ellipse 100% 70% at 8% -8%, #bfdbfe 0%, transparent 58%),
+    radial-gradient(ellipse 80% 55% at 100% 0%, #99f6e4 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, #e0f2fe 0%, transparent 55%),
     var(--fog);
+  background-attachment: fixed;
   font-family: var(--font-sans), system-ui, sans-serif;
   min-height: 100vh;
 }
@@ -27,4 +33,28 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+
+  .pill-scroll {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .pill-scroll::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes feed-grid-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.feed-grid-enter {
+  animation: feed-grid-enter 0.35s ease-out both;
 }

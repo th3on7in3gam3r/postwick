@@ -1,10 +1,12 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
+import { signInRedirectUrl } from "@/lib/auth-redirect";
 import { pruneRateLimitBuckets, rateLimitOk } from "@/lib/rate-limit";
 
 const isPublicRoute = createRouteMatcher([
   "/",
   "/b/(.*)",
+  "/u/(.*)",
   "/privacy",
   "/terms",
   "/report",
@@ -21,6 +23,15 @@ function isClerkConfigured() {
   return Boolean(
     process.env.CLERK_SECRET_KEY?.trim() &&
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim(),
+  );
+}
+
+function redirectToAppSignIn(req: NextRequest) {
+  return NextResponse.redirect(
+    signInRedirectUrl(
+      req.url,
+      `${req.nextUrl.pathname}${req.nextUrl.search}`,
+    ),
   );
 }
 
@@ -44,8 +55,13 @@ const clerkHandler = clerkMiddleware(async (auth, req) => {
     }
   }
 
+  // Always send unauthenticated users to the app /sign-in shell (gradient + nav),
+  // never Clerk Account Portal via protect()'s default destination.
   if (!isPublicRoute(req)) {
-    await auth().protect();
+    const { userId } = await auth();
+    if (!userId) {
+      return redirectToAppSignIn(req);
+    }
   }
 });
 
@@ -77,12 +93,7 @@ export default async function middleware(req: NextRequest, event: NextFetchEvent
       path.startsWith("/api/account");
 
     if (needsAuth) {
-      const signIn = new URL("/sign-in", req.url);
-      signIn.searchParams.set(
-        "redirect_url",
-        `${req.nextUrl.pathname}${req.nextUrl.search}`,
-      );
-      return NextResponse.redirect(signIn);
+      return redirectToAppSignIn(req);
     }
 
     return NextResponse.next();
@@ -95,12 +106,7 @@ export default async function middleware(req: NextRequest, event: NextFetchEvent
     if (isPublicRoute(req)) {
       return NextResponse.next();
     }
-    const signIn = new URL("/sign-in", req.url);
-    signIn.searchParams.set(
-      "redirect_url",
-      `${req.nextUrl.pathname}${req.nextUrl.search}`,
-    );
-    return NextResponse.redirect(signIn);
+    return redirectToAppSignIn(req);
   }
 }
 

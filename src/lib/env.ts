@@ -66,3 +66,13 @@ export function sanitizeCity(value: string | null | undefined): string | undefin
   if (!trimmed) return undefined;
   return trimmed.slice(0, 80);
 }
+
+/** Search query: trim, cap length, strip ILIKE wildcards. */
+export function sanitizeSearchQuery(
+  value: string | null | undefined,
+): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  const cleaned = trimmed.replace(/[%_]/g, "").slice(0, 80).trim();
+  return cleaned || undefined;
+}

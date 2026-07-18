@@ -14,11 +14,11 @@ const navLinkClass =
 
 export function SiteHeader() {
   return (
-    <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-6 px-5 py-5 md:px-8 md:py-6">
+    <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-5 py-5 md:gap-6 md:px-8 md:py-6">
       {/* Hard nav: Clerk catch-all sign-in routes can trap Next.js <Link> soft nav to /. */}
       <a
         href="/"
-        className="group flex shrink-0 items-center gap-2.5"
+        className="group flex min-w-0 shrink-0 items-center gap-2.5"
         aria-label="Postwick home"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -42,9 +42,9 @@ export function SiteHeader() {
           <a href="/" className={navLinkClass}>
             Home
           </a>
-          <Link href="/studio" className={navLinkClass}>
+          <a href="/studio" className={navLinkClass}>
             Studio
-          </Link>
+          </a>
         </div>
 
         {isClerkConfigured() ? (
@@ -77,9 +77,9 @@ export function SiteFooter() {
         , then shared here when brands opt in.
       </p>
       <div className="flex flex-wrap gap-4">
-        <Link href="/studio" className="hover:text-ink">
+        <a href="/studio" className="hover:text-ink">
           Studio
-        </Link>
+        </a>
         <Link href="/report" className="hover:text-ink">
           Report
         </Link>
