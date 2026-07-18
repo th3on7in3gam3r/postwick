@@ -7,6 +7,7 @@ import {
   getPostwickAccountByClerkId,
   getStudioBrands,
   getStudioPosts,
+  getStudioViewsSummary,
 } from "@/lib/db";
 import { kerygmaUrl } from "@/lib/brand";
 
@@ -35,6 +36,11 @@ export default async function StudioPage() {
   }
 
   const account = await getPostwickAccountByClerkId(userId);
+  const brands = account ? await getStudioBrands(account) : [];
+  const posts = account ? await getStudioPosts(account) : [];
+  const views = account
+    ? await getStudioViewsSummary(account.brandIds)
+    : [];
 
   return (
     <div className="space-y-8">
@@ -57,8 +63,9 @@ export default async function StudioPage() {
       ) : (
         <StudioDashboard
           account={account}
-          brands={await getStudioBrands(account)}
-          posts={await getStudioPosts(account)}
+          brands={brands}
+          posts={posts}
+          views={views}
         />
       )}
     </div>

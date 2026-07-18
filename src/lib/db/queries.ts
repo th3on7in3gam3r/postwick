@@ -1,5 +1,5 @@
 import { and, desc, eq, sql } from "drizzle-orm";
-import { sanitizeNiche } from "@/lib/env";
+import { sanitizeCity, sanitizeNiche } from "@/lib/env";
 import { getDb } from "./client";
 import { getOwnerUsernameForBrandUserId, getOwnerUsernamesByBrandIds } from "./owner";
 import { brands, posts } from "./schema";
@@ -13,6 +13,7 @@ export type PublicFeedPost = {
   brandName: string;
   brandSlug: string;
   brandNiche: string | null;
+  brandCity: string | null;
   ownerUsername: string | null;
 };
 
@@ -22,6 +23,7 @@ export type PublicBrandProfile = {
   description: string | null;
   publicSlug: string;
   publicNiche: string | null;
+  publicCity: string | null;
   ownerUsername: string | null;
 };
 
@@ -33,18 +35,23 @@ const publicGates = and(
 
 export async function getPublicFeedPosts(options?: {
   niche?: string;
+  city?: string;
   limit?: number;
 }): Promise<PublicFeedPost[]> {
   if (!process.env.DATABASE_URL) return [];
 
   const limit = options?.limit ?? 48;
   const niche = sanitizeNiche(options?.niche);
+  const city = sanitizeCity(options?.city);
 
   try {
     const db = await getDb();
     const conditions = [publicGates];
     if (niche) {
       conditions.push(eq(brands.publicNiche, niche));
+    }
+    if (city) {
+      conditions.push(eq(brands.publicCity, city));
     }
 
     const rows = await db
@@ -58,6 +65,7 @@ export async function getPublicFeedPosts(options?: {
         brandName: brands.name,
         brandSlug: brands.publicSlug,
         brandNiche: brands.publicNiche,
+        brandCity: brands.publicCity,
       })
       .from(posts)
       .innerJoin(brands, eq(brands.id, posts.brandId))
@@ -80,6 +88,7 @@ export async function getPublicFeedPosts(options?: {
         brandName: row.brandName,
         brandSlug: row.brandSlug!,
         brandNiche: row.brandNiche,
+        brandCity: row.brandCity,
         ownerUsername: usernames.get(row.brandId) ?? null,
       }));
   } catch {
@@ -101,6 +110,26 @@ export async function getPublicNiches(): Promise<string[]> {
     return rows
       .map((row) => row.niche)
       .filter((niche): niche is string => Boolean(niche?.trim()))
+      .sort((a, b) => a.localeCompare(b));
+  } catch {
+    return [];
+  }
+}
+
+export async function getPublicCities(): Promise<string[]> {
+  if (!process.env.DATABASE_URL) return [];
+
+  try {
+    const db = await getDb();
+    const rows = await db
+      .selectDistinct({ city: brands.publicCity })
+      .from(posts)
+      .innerJoin(brands, eq(brands.id, posts.brandId))
+      .where(publicGates);
+
+    return rows
+      .map((row) => row.city)
+      .filter((city): city is string => Boolean(city?.trim()))
       .sort((a, b) => a.localeCompare(b));
   } catch {
     return [];
@@ -131,6 +160,7 @@ export async function getPublicBrandBySlug(
       description: row.description,
       publicSlug: row.publicSlug,
       publicNiche: row.publicNiche,
+      publicCity: row.publicCity,
       ownerUsername,
     };
   } catch {
@@ -157,6 +187,7 @@ export async function getPublicPostsByBrandSlug(
         brandName: brands.name,
         brandSlug: brands.publicSlug,
         brandNiche: brands.publicNiche,
+        brandCity: brands.publicCity,
       })
       .from(posts)
       .innerJoin(brands, eq(brands.id, posts.brandId))
@@ -179,6 +210,7 @@ export async function getPublicPostsByBrandSlug(
         brandName: row.brandName,
         brandSlug: row.brandSlug!,
         brandNiche: row.brandNiche,
+        brandCity: row.brandCity,
         ownerUsername: usernames.get(row.brandId) ?? null,
       }));
   } catch {

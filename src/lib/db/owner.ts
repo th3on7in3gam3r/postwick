@@ -72,17 +72,13 @@ export async function getPostwickAccountByClerkId(
 export async function redeemClaimCode(
   clerkUserId: string,
   rawCode: string,
-): Promise<{ account: PostwickAccount } | { error: string }> {
+): Promise<{ account: PostwickAccount; addedBrands: string[] } | { error: string }> {
   const code = rawCode.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
   if (code.length < 6 || code.length > 16) {
     return { error: "Enter a valid claim code." };
   }
 
   const existing = await getPostwickAccountByClerkId(clerkUserId);
-  if (existing) {
-    return { error: "This Postwick account is already linked." };
-  }
-
   const db = await getDb();
   const now = new Date().toISOString();
 
@@ -101,18 +97,6 @@ export async function redeemClaimCode(
   }
   if (new Date(claim.expiresAt).getTime() < Date.now()) {
     return { error: "This claim code has expired. Generate a new one in Kerygma." };
-  }
-
-  const linkedAlready = await db
-    .select({ id: postwickAccounts.id })
-    .from(postwickAccounts)
-    .where(eq(postwickAccounts.kerygmaUserId, claim.userId))
-    .limit(1);
-  if (linkedAlready[0]) {
-    return {
-      error:
-        "This Kerygma owner is already linked to another Postwick account.",
-    };
   }
 
   let brandIdList: string[] = [];
@@ -138,6 +122,60 @@ export async function redeemClaimCode(
     return { error: "No brands found for this claim code." };
   }
 
+  // Already linked: merge brands for the same Kerygma owner only.
+  if (existing) {
+    if (existing.kerygmaUserId !== claim.userId) {
+      return {
+        error:
+          "This claim code belongs to a different Kerygma owner. Switch accounts or use a code for your brands.",
+      };
+    }
+
+    const merged = Array.from(new Set([...existing.brandIds, ...brandIdList]));
+    const addedBrands = brandIdList.filter((id) => !existing.brandIds.includes(id));
+    if (addedBrands.length === 0) {
+      await db
+        .update(postwickClaimCodes)
+        .set({ usedAt: now })
+        .where(
+          and(eq(postwickClaimCodes.id, claim.id), isNull(postwickClaimCodes.usedAt)),
+        );
+      return {
+        error: "That brand is already linked to this Studio account.",
+      };
+    }
+
+    await db
+      .update(postwickClaimCodes)
+      .set({ usedAt: now })
+      .where(
+        and(eq(postwickClaimCodes.id, claim.id), isNull(postwickClaimCodes.usedAt)),
+      );
+
+    await db
+      .update(postwickAccounts)
+      .set({ brandIds: JSON.stringify(merged), updatedAt: now })
+      .where(eq(postwickAccounts.clerkUserId, clerkUserId));
+
+    const account = await getPostwickAccountByClerkId(clerkUserId);
+    if (!account) {
+      return { error: "Updated, but failed to reload account." };
+    }
+    return { account, addedBrands };
+  }
+
+  const linkedAlready = await db
+    .select({ id: postwickAccounts.id })
+    .from(postwickAccounts)
+    .where(eq(postwickAccounts.kerygmaUserId, claim.userId))
+    .limit(1);
+  if (linkedAlready[0]) {
+    return {
+      error:
+        "This Kerygma owner is already linked to another Postwick account. Sign in with that account to add brands.",
+    };
+  }
+
   await db
     .update(postwickClaimCodes)
     .set({ usedAt: now })
@@ -160,7 +198,7 @@ export async function redeemClaimCode(
   if (!account) {
     return { error: "Linked, but failed to load account." };
   }
-  return { account };
+  return { account, addedBrands: brandIdList };
 }
 
 export async function updatePostwickUsername(

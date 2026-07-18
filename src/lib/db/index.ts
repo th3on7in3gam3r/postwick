@@ -2,6 +2,7 @@ export { getDb } from "./client";
 export {
   getPublicBrandBySlug,
   getPublicBrandSlugs,
+  getPublicCities,
   getPublicFeedPosts,
   getPublicNiches,
   getPublicPostsByBrandSlug,
@@ -19,3 +20,8 @@ export {
   type StudioBrand,
   type StudioPost,
 } from "./owner";
+export {
+  getStudioViewsSummary,
+  recordPageView,
+  type StudioViewsSummary,
+} from "./analytics";

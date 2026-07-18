@@ -3,17 +3,20 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { PostwickAccount, StudioBrand, StudioPost } from "@/lib/db";
+import type { PostwickAccount, StudioBrand, StudioPost, StudioViewsSummary } from "@/lib/db";
 import { kerygmaUrl } from "@/lib/brand";
+import { AddBrandClaimForm } from "@/components/studio/add-brand-claim-form";
 
 export function StudioDashboard({
   account,
   brands,
   posts: initialPosts,
+  views,
 }: {
   account: PostwickAccount;
   brands: StudioBrand[];
   posts: StudioPost[];
+  views: StudioViewsSummary[];
 }) {
   const router = useRouter();
   const [username, setUsername] = useState(account.username ?? "");
@@ -291,6 +294,32 @@ export function StudioDashboard({
                 ) : (
                   <span className="text-slate">Not listed publicly</span>
                 )}
+              </li>
+            ))}
+          </ul>
+        )}
+        <AddBrandClaimForm />
+      </section>
+
+      <section className="rounded-3xl border border-ink/8 bg-white/80 p-6 shadow-soft md:p-8">
+        <h2 className="font-display text-xl text-ink">Views</h2>
+        <p className="mt-1 text-sm text-slate">
+          Public page views on Postwick (no visitor identity). Totals refresh as
+          people open your brand pages.
+        </p>
+        {views.length === 0 ? (
+          <p className="mt-4 text-sm text-slate">No view data yet.</p>
+        ) : (
+          <ul className="mt-4 space-y-2">
+            {views.map((row) => (
+              <li
+                key={row.brandId}
+                className="flex flex-wrap items-center justify-between gap-2 border-b border-ink/5 py-2 text-sm last:border-0"
+              >
+                <span className="font-medium text-ink">{row.brandName}</span>
+                <span className="text-slate">
+                  {row.last7} (7d) · {row.last30} (30d)
+                </span>
               </li>
             ))}
           </ul>

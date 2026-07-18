@@ -50,6 +50,9 @@ export function PostCard({
           {post.brandNiche ? (
             <span className="text-slate">{post.brandNiche}</span>
           ) : null}
+          {post.brandCity ? (
+            <span className="text-slate">{post.brandCity}</span>
+          ) : null}
           {when ? <span className="text-slate/80">{when}</span> : null}
         </div>
         {imageUrl ? (

@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FeedEmpty, PostCard } from "@/components/post-card";
-import { NicheFilter } from "@/components/niche-filter";
+import { DiscoverFilters } from "@/components/discover-filters";
 import { kerygmaUrl } from "@/lib/brand";
-import { getPublicFeedPosts, getPublicNiches } from "@/lib/db";
-import { sanitizeNiche } from "@/lib/env";
+import {
+  getPublicCities,
+  getPublicFeedPosts,
+  getPublicNiches,
+} from "@/lib/db";
+import { sanitizeCity, sanitizeNiche } from "@/lib/env";
 
 export const metadata: Metadata = {
   title: "Home",
@@ -17,12 +21,14 @@ export const dynamic = "force-dynamic";
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: { niche?: string };
+  searchParams: { niche?: string; city?: string };
 }) {
   const niche = sanitizeNiche(searchParams.niche);
-  const [posts, niches] = await Promise.all([
-    getPublicFeedPosts({ niche }),
+  const city = sanitizeCity(searchParams.city);
+  const [posts, niches, cities] = await Promise.all([
+    getPublicFeedPosts({ niche, city }),
     getPublicNiches(),
+    getPublicCities(),
   ]);
 
   return (
@@ -35,8 +41,8 @@ export default async function HomePage({
           Postwick
         </h1>
         <p className="mt-4 max-w-xl text-base leading-relaxed text-slate md:text-lg">
-          A public feed of posts brands choose to share. Browse below — owners
-          manage captions and usernames in Studio.
+          A public feed of posts brands choose to share. Browse by niche or city
+          — owners manage captions and usernames in Studio.
         </p>
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <Link
@@ -56,7 +62,12 @@ export default async function HomePage({
         </div>
       </section>
 
-      <NicheFilter niches={niches} active={niche} />
+      <DiscoverFilters
+        niches={niches}
+        cities={cities}
+        activeNiche={niche}
+        activeCity={city}
+      />
 
       {posts.length === 0 ? (
         <FeedEmpty />

@@ -3,7 +3,7 @@
 --
 -- Run in Neon SQL Editor (Kerygma project) as an owner/admin role.
 -- Prefer a write-capable Postwick role if you enable Owner Studio
--- (claim codes, username, caption edits). Use read-only only for feed-only deploys.
+-- (claim codes, username, caption edits, view beacons).
 
 -- 1) Create login role (change the password before running)
 DO $$
@@ -27,7 +27,8 @@ GRANT SELECT (
   description,
   is_public,
   public_slug,
-  public_niche
+  public_niche,
+  public_city
 ) ON brands TO postwick_app;
 
 GRANT SELECT (
@@ -42,9 +43,10 @@ GRANT SELECT (
   updated_at
 ) ON posts TO postwick_app;
 
--- 4) Owner studio: claim / accounts + limited post updates
+-- 4) Owner studio: claim / accounts + limited post updates + views
 GRANT SELECT, INSERT, UPDATE ON postwick_claim_codes TO postwick_app;
 GRANT SELECT, INSERT, UPDATE ON postwick_accounts TO postwick_app;
+GRANT SELECT, INSERT, UPDATE ON postwick_page_views TO postwick_app;
 GRANT UPDATE (content, is_public, updated_at) ON posts TO postwick_app;
 
 -- Optional legacy read-only role (feed only — no Studio writes)
@@ -66,7 +68,8 @@ GRANT SELECT (
   description,
   is_public,
   public_slug,
-  public_niche
+  public_niche,
+  public_city
 ) ON brands TO postwick_readonly;
 GRANT SELECT (
   id,
@@ -79,3 +82,4 @@ GRANT SELECT (
   is_public
 ) ON posts TO postwick_readonly;
 GRANT SELECT (kerygma_user_id, username) ON postwick_accounts TO postwick_readonly;
+GRANT SELECT (brand_id, post_id, path, viewed_on, count) ON postwick_page_views TO postwick_readonly;

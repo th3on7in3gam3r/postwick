@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 import { FeedEmpty, PostCard } from "@/components/post-card";
+import { ViewBeacon } from "@/components/view-beacon";
 import { appUrl, kerygmaUrl } from "@/lib/brand";
 import {
   getPublicBrandBySlug,
@@ -42,12 +43,13 @@ export default async function BrandPage({ params }: PageProps) {
 
   return (
     <div className="space-y-10">
+      <ViewBeacon brandSlug={brand.publicSlug} path={`/b/${brand.publicSlug}`} />
       <section className="rounded-3xl border border-ink/8 bg-white/75 p-8 shadow-soft md:p-10">
-        {brand.publicNiche ? (
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">
-            {brand.publicNiche}
-          </p>
-        ) : null}
+        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-accent">
+          {brand.publicNiche ? <span>{brand.publicNiche}</span> : null}
+          {brand.publicNiche && brand.publicCity ? <span>·</span> : null}
+          {brand.publicCity ? <span>{brand.publicCity}</span> : null}
+        </div>
         <h1 className="mt-3 font-display text-[clamp(2rem,5vw,3rem)] tracking-tight text-ink">
           {brand.name}
         </h1>
@@ -82,7 +84,7 @@ export default async function BrandPage({ params }: PageProps) {
         </div>
         <p className="mt-6 text-sm text-slate">
           <Link href="/" className="hover:text-ink hover:underline">
-            ← Back to feed
+            ← Back to home
           </Link>
         </p>
       </section>

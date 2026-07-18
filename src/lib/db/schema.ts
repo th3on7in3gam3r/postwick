@@ -1,9 +1,11 @@
 import {
   boolean,
+  integer,
   pgTable,
   text,
   timestamp,
   uniqueIndex,
+  date,
 } from "drizzle-orm/pg-core";
 
 /** Shared with Kerygma — public brand columns. */
@@ -16,6 +18,7 @@ export const brands = pgTable("brands", {
   isPublic: boolean("is_public").notNull().default(false),
   publicSlug: text("public_slug"),
   publicNiche: text("public_niche"),
+  publicCity: text("public_city"),
 });
 
 /** Shared with Kerygma — public post columns. */
@@ -74,5 +77,26 @@ export const postwickAccounts = pgTable(
       table.kerygmaUserId,
     ),
     usernameIdx: uniqueIndex("postwick_accounts_username_idx").on(table.username),
+  }),
+);
+
+/** Aggregated public views (no PII). */
+export const postwickPageViews = pgTable(
+  "postwick_page_views",
+  {
+    id: text("id").primaryKey(),
+    brandId: text("brand_id").notNull(),
+    postId: text("post_id"),
+    path: text("path").notNull(),
+    viewedOn: date("viewed_on", { mode: "string" }).notNull(),
+    count: integer("count").notNull().default(1),
+  },
+  (table) => ({
+    dayIdx: uniqueIndex("postwick_page_views_day_idx").on(
+      table.brandId,
+      table.postId,
+      table.path,
+      table.viewedOn,
+    ),
   }),
 );

@@ -59,3 +59,10 @@ export function sanitizeNiche(value: string | null | undefined): string | undefi
   if (!trimmed) return undefined;
   return trimmed.slice(0, 64);
 }
+
+/** City query param: trim and cap length. */
+export function sanitizeCity(value: string | null | undefined): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  return trimmed.slice(0, 80);
+}
