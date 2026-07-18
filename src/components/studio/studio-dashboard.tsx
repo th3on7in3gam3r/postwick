@@ -23,7 +23,12 @@ export function StudioDashboard({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [postError, setPostError] = useState<string | null>(null);
+  const [postMessage, setPostMessage] = useState<string | null>(null);
   const [savingPostId, setSavingPostId] = useState<string | null>(null);
+
+  const hasUsername = Boolean(account.username?.trim());
+  const firstBrandSlug =
+    brands.find((brand) => brand.publicSlug)?.publicSlug ?? null;
 
   async function saveUsername(event: React.FormEvent) {
     event.preventDefault();
@@ -62,6 +67,7 @@ export function StudioDashboard({
 
   async function saveCaption(postId: string) {
     setPostError(null);
+    setPostMessage(null);
     setSavingPostId(postId);
     try {
       const response = await fetch(`/api/studio/posts/${postId}`, {
@@ -81,6 +87,12 @@ export function StudioDashboard({
         prev.map((item) => (item.id === postId ? data.post! : item)),
       );
       setEditingId(null);
+      const slug = data.post.brandSlug;
+      setPostMessage(
+        slug
+          ? "Caption saved. Check the public brand page to confirm the feed updated."
+          : "Caption saved.",
+      );
       router.refresh();
     } catch {
       setPostError("Could not update caption. Try again.");
@@ -115,6 +127,71 @@ export function StudioDashboard({
 
   return (
     <div className="space-y-8">
+      <section className="rounded-3xl border border-ink/8 bg-white/80 p-6 shadow-soft md:p-8">
+        <h2 className="font-display text-xl text-ink">Claim path checklist</h2>
+        <p className="mt-1 text-sm text-slate">
+          Confirm the owner loop end to end — claim code, username, then a
+          caption edit that shows on Home.
+        </p>
+        <ol className="mt-4 space-y-2 text-sm text-ink">
+          <li className="flex gap-2">
+            <span className="text-accent" aria-hidden>
+              ✓
+            </span>
+            <span>
+              Linked via Kerygma claim code
+              {brands.length > 0
+                ? ` (${brands.length} brand${brands.length === 1 ? "" : "s"})`
+                : ""}
+            </span>
+          </li>
+          <li className="flex gap-2">
+            <span className={hasUsername ? "text-accent" : "text-slate"} aria-hidden>
+              {hasUsername ? "✓" : "○"}
+            </span>
+            <span>
+              {hasUsername ? (
+                <>
+                  Display username set as{" "}
+                  <span className="font-medium">@{account.username}</span>
+                </>
+              ) : (
+                "Set a display username below"
+              )}
+            </span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-slate" aria-hidden>
+              ○
+            </span>
+            <span>
+              Edit one shared caption below, then open{" "}
+              {firstBrandSlug ? (
+                <Link
+                  href={`/b/${firstBrandSlug}`}
+                  className="font-medium text-ink underline-offset-2 hover:underline"
+                >
+                  your public brand page
+                </Link>
+              ) : (
+                "Home"
+              )}{" "}
+              to confirm it updated.
+            </span>
+          </li>
+        </ol>
+        {firstBrandSlug ? (
+          <p className="mt-4 text-sm">
+            <Link
+              href={`/b/${firstBrandSlug}`}
+              className="font-medium text-accent underline-offset-2 hover:underline"
+            >
+              View public page →
+            </Link>
+          </p>
+        ) : null}
+      </section>
+
       <section className="rounded-3xl border border-ink/8 bg-white/80 p-6 shadow-soft md:p-8">
         <h2 className="font-display text-xl text-ink">Display username</h2>
         <p className="mt-1 text-sm leading-relaxed text-slate">
@@ -207,11 +284,25 @@ export function StudioDashboard({
       <section className="rounded-3xl border border-ink/8 bg-white/80 p-6 shadow-soft md:p-8">
         <h2 className="font-display text-xl text-ink">Shared posts</h2>
         <p className="mt-1 text-sm text-slate">
-          Edit captions or remove posts from the public Postwick feed.
+          Edit captions or remove posts from the public Postwick feed. After
+          saving, open the brand page to confirm Home shows the new text.
         </p>
         {postError ? (
           <p className="mt-3 text-sm text-red-600" role="alert">
             {postError}
+          </p>
+        ) : null}
+        {postMessage ? (
+          <p className="mt-3 text-sm text-accent" role="status">
+            {postMessage}{" "}
+            {firstBrandSlug ? (
+              <Link
+                href={`/b/${firstBrandSlug}`}
+                className="font-medium underline-offset-2 hover:underline"
+              >
+                Open brand page
+              </Link>
+            ) : null}
           </p>
         ) : null}
         {posts.length === 0 ? (
@@ -270,6 +361,14 @@ export function StudioDashboard({
                       >
                         Edit caption
                       </button>
+                      {post.brandSlug ? (
+                        <Link
+                          href={`/b/${post.brandSlug}`}
+                          className="rounded-full border border-ink/15 px-3 py-1.5 text-xs font-medium text-slate hover:border-ink/30 hover:text-ink"
+                        >
+                          View on Postwick
+                        </Link>
+                      ) : null}
                       <button
                         type="button"
                         disabled={savingPostId === post.id}
