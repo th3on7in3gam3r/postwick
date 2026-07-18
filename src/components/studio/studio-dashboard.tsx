@@ -117,8 +117,17 @@ export function StudioDashboard({
     <div className="space-y-8">
       <section className="rounded-3xl border border-ink/8 bg-white/80 p-6 shadow-soft md:p-8">
         <h2 className="font-display text-xl text-ink">Display username</h2>
-        <p className="mt-1 text-sm text-slate">
-          Shown next to your brand name on Postwick when set.
+        <p className="mt-1 text-sm leading-relaxed text-slate">
+          Your public <span className="font-medium text-ink">@handle</span> as
+          the owner — shown next to brand names on Postwick. This is not your
+          brand name (that comes from Kerygma below).
+        </p>
+        <p className="mt-2 text-xs leading-relaxed text-slate/90">
+          Use 3–24 characters: letters, numbers, and underscores only (no
+          spaces). Example:{" "}
+          <code className="rounded bg-fog px-1.5 py-0.5 text-ink">
+            biblefunland_studios
+          </code>
         </p>
         <form
           onSubmit={saveUsername}
@@ -126,15 +135,21 @@ export function StudioDashboard({
         >
           <label className="min-w-[12rem] flex-1 text-xs font-medium uppercase tracking-wide text-slate">
             Username
-            <input
-              value={username}
-              onChange={(event) => setUsername(event.target.value)}
-              placeholder="yourbrand"
-              className="mt-1.5 w-full rounded-xl border border-ink/15 bg-fog px-4 py-2.5 text-sm text-ink outline-none focus:border-accent"
-              minLength={3}
-              maxLength={24}
-              pattern="[A-Za-z0-9_]+"
-            />
+            <div className="mt-1.5 flex items-center gap-1.5">
+              <span className="text-sm text-slate" aria-hidden>
+                @
+              </span>
+              <input
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                placeholder="your_handle"
+                className="w-full rounded-xl border border-ink/15 bg-fog px-4 py-2.5 text-sm text-ink outline-none focus:border-accent"
+                minLength={3}
+                maxLength={24}
+                pattern="[A-Za-z0-9_]+"
+                title="Letters, numbers, and underscores only (3–24 characters)"
+              />
+            </div>
           </label>
           <button
             type="submit"
@@ -158,6 +173,11 @@ export function StudioDashboard({
 
       <section className="rounded-3xl border border-ink/8 bg-white/80 p-6 shadow-soft md:p-8">
         <h2 className="font-display text-xl text-ink">Linked brands</h2>
+        <p className="mt-1 text-sm leading-relaxed text-slate">
+          These are your Kerygma businesses linked via the claim code — each has
+          its own public Postwick page. Your username above is separate from
+          these brand names.
+        </p>
         {brands.length === 0 ? (
           <p className="mt-3 text-sm text-slate">No brands linked yet.</p>
         ) : (

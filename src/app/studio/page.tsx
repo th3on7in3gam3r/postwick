@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
-import { UserButton } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import { ClaimCodeForm } from "@/components/studio/claim-code-form";
 import { StudioDashboard } from "@/components/studio/studio-dashboard";
@@ -40,25 +38,17 @@ export default async function StudioPage() {
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">
-            Owner studio
-          </p>
-          <h1 className="mt-2 font-display text-3xl tracking-tight text-ink md:text-4xl">
-            Studio
-          </h1>
-          <p className="mt-2 max-w-xl text-sm text-slate">
-            Link your Kerygma brand with a claim code, set a display username, and
-            edit captions for posts shared on Postwick.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link href="/" className="text-sm text-slate hover:text-ink">
-            View feed
-          </Link>
-          <UserButton afterSignOutUrl="/" />
-        </div>
+      <header>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">
+          Owner studio
+        </p>
+        <h1 className="mt-2 font-display text-3xl tracking-tight text-ink md:text-4xl">
+          Studio
+        </h1>
+        <p className="mt-2 max-w-xl text-sm text-slate">
+          Link your Kerygma brand with a claim code, set a display username, and
+          edit captions for posts shared on Postwick.
+        </p>
       </header>
 
       {!account ? (

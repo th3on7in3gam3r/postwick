@@ -40,16 +40,18 @@ export function SiteHeader() {
       >
         <div className="flex items-center gap-0.5 sm:gap-1">
           <a href="/" className={navLinkClass}>
-            Feed
+            Home
           </a>
           <Link href="/studio" className={navLinkClass}>
             Studio
           </Link>
           <a
             href={kerygmaUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
             className={`hidden md:inline ${navLinkClass}`}
           >
-            Create
+            Kerygma
           </a>
         </div>
 
