@@ -5,8 +5,10 @@ export {
   getPublicCities,
   getPublicFeedPosts,
   getPublicNiches,
+  getPublicPostByBrandSlugAndId,
   getPublicPostsByBrandSlug,
   type PublicBrandProfile,
+  type PublicFeedPage,
   type PublicFeedPost,
 } from "./queries";
 export {

@@ -27,20 +27,77 @@ export type PublicBrandProfile = {
   ownerUsername: string | null;
 };
 
+export type PublicFeedPage = {
+  posts: PublicFeedPost[];
+  hasMore: boolean;
+  nextOffset: number | null;
+};
+
 const publicGates = and(
   eq(posts.status, "published"),
   eq(posts.isPublic, true),
   eq(brands.isPublic, true),
 );
 
+const DEFAULT_PAGE_SIZE = 48;
+const MAX_PAGE_SIZE = 100;
+
+function clampLimit(limit?: number) {
+  if (limit == null || !Number.isFinite(limit)) return DEFAULT_PAGE_SIZE;
+  return Math.min(Math.max(Math.trunc(limit), 1), MAX_PAGE_SIZE);
+}
+
+function clampOffset(offset?: number) {
+  if (offset == null || !Number.isFinite(offset) || offset < 0) return 0;
+  return Math.trunc(offset);
+}
+
+type FeedRow = {
+  id: string;
+  platform: string;
+  content: string;
+  imageUrl: string | null;
+  publishedAt: string | null;
+  brandId: string;
+  brandName: string;
+  brandSlug: string | null;
+  brandNiche: string | null;
+  brandCity: string | null;
+};
+
+async function mapFeedRows(rows: FeedRow[]): Promise<PublicFeedPost[]> {
+  const usernames = await getOwnerUsernamesByBrandIds(
+    rows.map((row) => row.brandId),
+  );
+
+  return rows
+    .filter((row) => Boolean(row.brandSlug))
+    .map((row) => ({
+      id: row.id,
+      platform: row.platform,
+      content: row.content,
+      imageUrl: row.imageUrl,
+      publishedAt: row.publishedAt,
+      brandName: row.brandName,
+      brandSlug: row.brandSlug!,
+      brandNiche: row.brandNiche,
+      brandCity: row.brandCity,
+      ownerUsername: usernames.get(row.brandId) ?? null,
+    }));
+}
+
 export async function getPublicFeedPosts(options?: {
   niche?: string;
   city?: string;
   limit?: number;
-}): Promise<PublicFeedPost[]> {
-  if (!process.env.DATABASE_URL) return [];
+  offset?: number;
+}): Promise<PublicFeedPage> {
+  if (!process.env.DATABASE_URL) {
+    return { posts: [], hasMore: false, nextOffset: null };
+  }
 
-  const limit = options?.limit ?? 48;
+  const limit = clampLimit(options?.limit);
+  const offset = clampOffset(options?.offset);
   const niche = sanitizeNiche(options?.niche);
   const city = sanitizeCity(options?.city);
 
@@ -71,28 +128,20 @@ export async function getPublicFeedPosts(options?: {
       .innerJoin(brands, eq(brands.id, posts.brandId))
       .where(and(...conditions))
       .orderBy(desc(posts.publishedAt), desc(posts.id))
-      .limit(limit);
+      .limit(limit + 1)
+      .offset(offset);
 
-    const usernames = await getOwnerUsernamesByBrandIds(
-      rows.map((row) => row.brandId),
-    );
+    const hasMore = rows.length > limit;
+    const pageRows = hasMore ? rows.slice(0, limit) : rows;
+    const mapped = await mapFeedRows(pageRows);
 
-    return rows
-      .filter((row) => Boolean(row.brandSlug))
-      .map((row) => ({
-        id: row.id,
-        platform: row.platform,
-        content: row.content,
-        imageUrl: row.imageUrl,
-        publishedAt: row.publishedAt,
-        brandName: row.brandName,
-        brandSlug: row.brandSlug!,
-        brandNiche: row.brandNiche,
-        brandCity: row.brandCity,
-        ownerUsername: usernames.get(row.brandId) ?? null,
-      }));
+    return {
+      posts: mapped,
+      hasMore,
+      nextOffset: hasMore ? offset + limit : null,
+    };
   } catch {
-    return [];
+    return { posts: [], hasMore: false, nextOffset: null };
   }
 }
 
@@ -170,9 +219,14 @@ export async function getPublicBrandBySlug(
 
 export async function getPublicPostsByBrandSlug(
   slug: string,
-  limit = 48,
-): Promise<PublicFeedPost[]> {
-  if (!process.env.DATABASE_URL) return [];
+  options?: { limit?: number; offset?: number },
+): Promise<PublicFeedPage> {
+  if (!process.env.DATABASE_URL) {
+    return { posts: [], hasMore: false, nextOffset: null };
+  }
+
+  const limit = clampLimit(options?.limit);
+  const offset = clampOffset(options?.offset);
 
   try {
     const db = await getDb();
@@ -193,28 +247,55 @@ export async function getPublicPostsByBrandSlug(
       .innerJoin(brands, eq(brands.id, posts.brandId))
       .where(and(publicGates, eq(brands.publicSlug, slug)))
       .orderBy(desc(posts.publishedAt), desc(posts.id))
-      .limit(limit);
+      .limit(limit + 1)
+      .offset(offset);
 
-    const usernames = await getOwnerUsernamesByBrandIds(
-      rows.map((row) => row.brandId),
-    );
+    const hasMore = rows.length > limit;
+    const pageRows = hasMore ? rows.slice(0, limit) : rows;
+    const mapped = await mapFeedRows(pageRows);
 
-    return rows
-      .filter((row) => Boolean(row.brandSlug))
-      .map((row) => ({
-        id: row.id,
-        platform: row.platform,
-        content: row.content,
-        imageUrl: row.imageUrl,
-        publishedAt: row.publishedAt,
-        brandName: row.brandName,
-        brandSlug: row.brandSlug!,
-        brandNiche: row.brandNiche,
-        brandCity: row.brandCity,
-        ownerUsername: usernames.get(row.brandId) ?? null,
-      }));
+    return {
+      posts: mapped,
+      hasMore,
+      nextOffset: hasMore ? offset + limit : null,
+    };
   } catch {
-    return [];
+    return { posts: [], hasMore: false, nextOffset: null };
+  }
+}
+
+export async function getPublicPostByBrandSlugAndId(
+  slug: string,
+  postId: string,
+): Promise<PublicFeedPost | null> {
+  if (!process.env.DATABASE_URL) return null;
+
+  try {
+    const db = await getDb();
+    const rows = await db
+      .select({
+        id: posts.id,
+        platform: posts.platform,
+        content: posts.content,
+        imageUrl: posts.imageUrl,
+        publishedAt: posts.publishedAt,
+        brandId: brands.id,
+        brandName: brands.name,
+        brandSlug: brands.publicSlug,
+        brandNiche: brands.publicNiche,
+        brandCity: brands.publicCity,
+      })
+      .from(posts)
+      .innerJoin(brands, eq(brands.id, posts.brandId))
+      .where(
+        and(publicGates, eq(brands.publicSlug, slug), eq(posts.id, postId)),
+      )
+      .limit(1);
+
+    const mapped = await mapFeedRows(rows);
+    return mapped[0] ?? null;
+  } catch {
+    return null;
   }
 }
 

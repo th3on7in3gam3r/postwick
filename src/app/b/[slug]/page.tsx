@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ExternalLink } from "lucide-react";
-import { FeedEmpty, PostCard } from "@/components/post-card";
+import { CopyLinkButton } from "@/components/copy-link-button";
+import { FeedEmpty } from "@/components/post-card";
+import { FeedGrid } from "@/components/feed-grid";
 import { ViewBeacon } from "@/components/view-beacon";
 import { appUrl, kerygmaUrl } from "@/lib/brand";
 import {
@@ -10,6 +12,7 @@ import {
   getPublicPostsByBrandSlug,
 } from "@/lib/db";
 import { safeHttpUrl } from "@/lib/safe-url";
+import { sharePageMetadata, truncateForMeta } from "@/lib/seo";
 
 type PageProps = {
   params: { slug: string };
@@ -25,21 +28,28 @@ export async function generateMetadata({
     return { title: "Brand not found" };
   }
 
-  return {
-    title: brand.name,
-    description:
-      brand.description ??
+  const page = await getPublicPostsByBrandSlug(params.slug, { limit: 1 });
+  const firstImage = page.posts[0]?.imageUrl ?? null;
+  const description = truncateForMeta(
+    brand.description ??
       `Public posts from ${brand.name} on Postwick.`,
-    alternates: { canonical: `${appUrl()}/b/${params.slug}` },
-  };
+  );
+
+  return sharePageMetadata({
+    title: brand.name,
+    description,
+    path: `/b/${params.slug}`,
+    imageUrl: firstImage,
+  });
 }
 
 export default async function BrandPage({ params }: PageProps) {
   const brand = await getPublicBrandBySlug(params.slug);
   if (!brand) notFound();
 
-  const posts = await getPublicPostsByBrandSlug(params.slug);
+  const page = await getPublicPostsByBrandSlug(params.slug);
   const websiteUrl = safeHttpUrl(brand.websiteUrl);
+  const shareUrl = `${appUrl()}/b/${brand.publicSlug}`;
 
   return (
     <div className="space-y-10">
@@ -64,6 +74,7 @@ export default async function BrandPage({ params }: PageProps) {
           </p>
         ) : null}
         <div className="mt-8 flex flex-wrap gap-3">
+          <CopyLinkButton url={shareUrl} />
           {websiteUrl ? (
             <a
               href={websiteUrl}
@@ -89,17 +100,19 @@ export default async function BrandPage({ params }: PageProps) {
         </p>
       </section>
 
-      {posts.length === 0 ? (
+      {page.posts.length === 0 ? (
         <FeedEmpty
           title="No shared posts yet"
           description="This brand is listed publicly, but has not shared any published posts on Postwick. Owners can share from Kerygma History after publishing."
         />
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post) => (
-            <PostCard key={post.id} post={post} showBrand={false} />
-          ))}
-        </div>
+        <FeedGrid
+          initialPosts={page.posts}
+          initialHasMore={page.hasMore}
+          initialNextOffset={page.nextOffset}
+          source={{ kind: "brand", slug: brand.publicSlug }}
+          showBrand={false}
+        />
       )}
     </div>
   );

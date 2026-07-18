@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FeedEmpty, PostCard } from "@/components/post-card";
+import { FeedEmpty } from "@/components/post-card";
 import { DiscoverFilters } from "@/components/discover-filters";
+import { FeedGrid } from "@/components/feed-grid";
 import { kerygmaUrl } from "@/lib/brand";
 import {
   getPublicCities,
@@ -25,7 +26,7 @@ export default async function HomePage({
 }) {
   const niche = sanitizeNiche(searchParams.niche);
   const city = sanitizeCity(searchParams.city);
-  const [posts, niches, cities] = await Promise.all([
+  const [page, niches, cities] = await Promise.all([
     getPublicFeedPosts({ niche, city }),
     getPublicNiches(),
     getPublicCities(),
@@ -69,14 +70,16 @@ export default async function HomePage({
         activeCity={city}
       />
 
-      {posts.length === 0 ? (
+      {page.posts.length === 0 ? (
         <FeedEmpty />
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))}
-        </div>
+        <FeedGrid
+          key={`${niche ?? ""}-${city ?? ""}`}
+          initialPosts={page.posts}
+          initialHasMore={page.hasMore}
+          initialNextOffset={page.nextOffset}
+          source={{ kind: "home", niche, city }}
+        />
       )}
     </div>
   );

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CopyLinkButton } from "@/components/copy-link-button";
 import type { PublicFeedPost } from "@/lib/db";
 import { appUrl, kerygmaUrl } from "@/lib/brand";
 import { safeImageUrl } from "@/lib/safe-url";
@@ -23,25 +24,32 @@ export function PostCard({
 }) {
   const when = formatWhen(post.publishedAt);
   const imageUrl = safeImageUrl(post.imageUrl);
-  const reportHref = `/report?url=${encodeURIComponent(`${appUrl()}/b/${post.brandSlug}`)}&slug=${encodeURIComponent(post.brandSlug)}`;
+  const postPath = `/b/${post.brandSlug}/p/${post.id}`;
+  const postUrl = `${appUrl()}${postPath}`;
+  const reportHref = `/report?url=${encodeURIComponent(postUrl)}&slug=${encodeURIComponent(post.brandSlug)}`;
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-ink/8 bg-white/80 shadow-soft backdrop-blur-sm">
-      {imageUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={imageUrl}
-          alt=""
-          className="aspect-[4/3] w-full object-cover"
-          referrerPolicy="no-referrer"
-        />
-      ) : (
-        <div className="flex aspect-[4/3] items-end bg-gradient-to-br from-mist via-accent-soft to-fog p-5">
-          <p className="font-display text-xl italic text-ink/70 line-clamp-3">
-            {post.content}
-          </p>
-        </div>
-      )}
+    <article
+      id={`post-${post.id}`}
+      className="overflow-hidden rounded-2xl border border-ink/8 bg-white/80 shadow-soft backdrop-blur-sm"
+    >
+      <Link href={postPath} className="block">
+        {imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageUrl}
+            alt=""
+            className="aspect-[4/3] w-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <div className="flex aspect-[4/3] items-end bg-gradient-to-br from-mist via-accent-soft to-fog p-5">
+            <p className="font-display text-xl italic text-ink/70 line-clamp-3">
+              {post.content}
+            </p>
+          </div>
+        )}
+      </Link>
       <div className="space-y-3 p-5">
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <span className="rounded-full bg-accent-soft px-2.5 py-1 font-medium uppercase tracking-wide text-accent">
@@ -76,18 +84,20 @@ export function PostCard({
           ) : (
             <span />
           )}
-          <Link
-            href={reportHref}
-            className="text-xs text-slate underline-offset-2 hover:text-ink hover:underline"
-          >
-            Report
-          </Link>
+          <div className="flex items-center gap-3">
+            <CopyLinkButton url={postUrl} label="Copy link" variant="text" />
+            <Link
+              href={reportHref}
+              className="text-xs text-slate underline-offset-2 hover:text-ink hover:underline"
+            >
+              Report
+            </Link>
+          </div>
         </div>
       </div>
     </article>
   );
 }
-
 export function FeedEmpty({
   title = "No public posts yet",
   description = "When brands publish on Kerygma and share to Postwick, their posts appear here.",
