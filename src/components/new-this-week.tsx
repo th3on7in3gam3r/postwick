@@ -91,17 +91,17 @@ function NewThisWeekScroller({ posts }: { posts: PublicFeedPost[] }) {
               className="group w-56 shrink-0 overflow-hidden rounded-2xl border border-ink/8 bg-white/75 shadow-soft backdrop-blur-sm transition hover:-translate-y-0.5 hover:shadow-lg"
             >
               {imageUrl ? (
-                <div className="aspect-[4/3] w-full bg-mist">
+                <div className="aspect-square w-full bg-mist">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={imageUrl}
                     alt=""
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover object-top"
                     referrerPolicy="no-referrer"
                   />
                 </div>
               ) : (
-                <div className="flex aspect-[4/3] items-end bg-gradient-to-br from-mist via-accent-soft to-fog p-3">
+                <div className="flex aspect-square items-end bg-gradient-to-br from-mist via-accent-soft to-fog p-3">
                   <p className="font-display text-sm italic text-ink/70 line-clamp-3">
                     {post.content}
                   </p>

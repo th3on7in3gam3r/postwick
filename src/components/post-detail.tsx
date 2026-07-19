@@ -33,12 +33,12 @@ export function PostDetail({
   return (
     <article className="overflow-hidden rounded-3xl border border-ink/8 bg-white/75 shadow-soft backdrop-blur-sm">
       {imageUrl ? (
-        <div className="aspect-[4/3] w-full bg-mist sm:aspect-[16/10]">
+        <div className="w-full bg-mist">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={imageUrl}
             alt=""
-            className="h-full w-full object-cover"
+            className="mx-auto max-h-[min(80vh,52rem)] w-full object-contain"
             referrerPolicy="no-referrer"
           />
         </div>

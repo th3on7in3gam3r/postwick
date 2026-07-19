@@ -36,17 +36,17 @@ export function PostCard({
     >
       <Link href={postPath} className="block">
         {imageUrl ? (
-          <div className="aspect-[4/3] w-full bg-mist">
+          <div className="aspect-square w-full bg-mist">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={imageUrl}
               alt=""
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover object-top"
               referrerPolicy="no-referrer"
             />
           </div>
         ) : (
-          <div className="flex aspect-[4/3] w-full items-end bg-gradient-to-br from-mist via-accent-soft to-fog p-5">
+          <div className="flex aspect-square w-full items-end bg-gradient-to-br from-mist via-accent-soft to-fog p-5">
             <p className="font-display text-xl italic text-ink/70 line-clamp-3">
               {post.content}
             </p>
