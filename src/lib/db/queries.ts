@@ -53,7 +53,7 @@ function clampLimit(limit?: number) {
 }
 
 function clampOffset(offset?: number) {
-  if (offset == null || !Number.isFinite(offset) || offset < 0) return 0;
+  if (offset === null || !Number.isFinite(offset) || offset < 0) return 0;
   return Math.trunc(offset);
 }
 
