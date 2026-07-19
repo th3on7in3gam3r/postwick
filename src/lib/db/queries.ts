@@ -48,7 +48,7 @@ const DEFAULT_PAGE_SIZE = 48;
 const MAX_PAGE_SIZE = 100;
 
 function clampLimit(limit?: number) {
-  if (limit == null || !Number.isFinite(limit)) return DEFAULT_PAGE_SIZE;
+  if (limit === null || !Number.isFinite(limit)) return DEFAULT_PAGE_SIZE;
   return Math.min(Math.max(Math.trunc(limit), 1), MAX_PAGE_SIZE);
 }
 
