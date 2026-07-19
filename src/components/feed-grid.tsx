@@ -35,7 +35,7 @@ export function FeedGrid({
   const [error, setError] = useState<string | null>(null);
 
   async function loadMore() {
-    if (!hasMore || nextOffset == null || loading) return;
+    if (!hasMore || nextOffset === null || loading) return;
     setLoading(true);
     setError(null);
 
